@@ -5,6 +5,7 @@
 import { ShoppingCart, Menu, X, Search, User, ChevronRight, Sparkles } from 'lucide-react';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Page, Category, Subcategory, Product, discountedPrice } from '../types';
+import { AuthUser } from '../services/authService';
 
 interface NavbarProps {
   cartCount: number;
@@ -13,10 +14,11 @@ interface NavbarProps {
   categories: Category[];
   subcategories: Subcategory[];
   isAuthenticated: boolean;
+  authUser: AuthUser | null;
   onSearch: (query: string) => Promise<Product[]>;
 }
 
-export default function Navbar({ cartCount, navigate, categories, subcategories, isAuthenticated, onSearch }: NavbarProps) {
+export default function Navbar({ cartCount, navigate, categories, subcategories, isAuthenticated, authUser, onSearch }: NavbarProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [hoveredCat, setHoveredCat] = useState<string | null>(null);
 
@@ -155,10 +157,23 @@ export default function Navbar({ cartCount, navigate, categories, subcategories,
               >
                 <Search className="w-5 h-5" />
               </button>
-              <button onClick={() => navigate('auth')} className="hidden sm:flex w-9 h-9 items-center justify-center rounded-full hover:bg-cream-200 text-forest-700 transition-colors">
-                <User className="w-5 h-5" />
+              {/* Profile / Auth icon */}
+              <button
+                onClick={() => navigate(isAuthenticated ? 'profile' : 'auth')}
+                className="hidden sm:flex w-9 h-9 items-center justify-center rounded-full hover:bg-cream-200 text-forest-700 transition-colors overflow-hidden"
+                title={isAuthenticated ? authUser?.name : 'Sign in'}
+              >
+                {isAuthenticated && authUser?.picture ? (
+                  <img src={authUser.picture} alt={authUser.name} className="w-9 h-9 rounded-full object-cover" />
+                ) : (
+                  <User className="w-5 h-5" />
+                )}
               </button>
-              {isAuthenticated && <span className="hidden sm:inline text-xs text-forest-600">Signed in</span>}
+              {isAuthenticated && authUser && (
+                <span className="hidden sm:inline text-xs text-forest-600 max-w-[80px] truncate">
+                  {authUser.name.split(' ')[0]}
+                </span>
+              )}
               <button onClick={() => navigate('cart')} className="relative w-9 h-9 flex items-center justify-center rounded-full hover:bg-cream-200 text-forest-700 transition-colors">
                 <ShoppingCart className="w-5 h-5" />
                 {cartCount > 0 && (
@@ -199,7 +214,17 @@ export default function Navbar({ cartCount, navigate, categories, subcategories,
               ))}
             </div>
             <button onClick={() => { navigate('admin'); setMobileOpen(false); }} className="block w-full text-left py-2 text-forest-800 font-medium">Admin</button>
-            <button onClick={() => { navigate('auth'); setMobileOpen(false); }} className="block w-full text-left py-2 text-forest-800 font-medium">Sign In</button>
+            <button
+              onClick={() => { navigate(isAuthenticated ? 'profile' : 'auth'); setMobileOpen(false); }}
+              className="flex items-center gap-2 w-full text-left py-2 text-forest-800 font-medium"
+            >
+              {isAuthenticated && authUser?.picture ? (
+                <img src={authUser.picture} alt="" className="w-6 h-6 rounded-full object-cover" />
+              ) : (
+                <User className="w-4 h-4" />
+              )}
+              {isAuthenticated ? (authUser?.name.split(' ')[0] || 'Profile') : 'Sign In'}
+            </button>
           </div>
         )}
       </nav>
