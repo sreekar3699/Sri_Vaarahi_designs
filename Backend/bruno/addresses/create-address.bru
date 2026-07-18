@@ -1,0 +1,25 @@
+meta {
+  name: Create Address
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/addresses
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "user": { "id": 1 },
+    "addressLine": "12 Anna Salai",
+    "contactNumber": 9876543210,
+    "district": "Chennai",
+    "city": "Chennai",
+    "state": "Tamil Nadu",
+    "country": "India",
+    "pincode": "600002",
+    "landmark": "Near Central Station"
+  }
+}

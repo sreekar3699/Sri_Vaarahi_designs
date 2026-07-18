@@ -1,0 +1,18 @@
+meta {
+  name: Create Subcategory
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/subcategories
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "scName": "Kanjivaram",
+    "category": { "id": 1 }
+  }
+}

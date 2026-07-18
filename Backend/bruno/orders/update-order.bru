@@ -1,0 +1,21 @@
+meta {
+  name: Update Order
+  type: http
+  seq: 6
+}
+
+put {
+  url: {{baseUrl}}/api/orders/1
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "user": { "id": 1 },
+    "product": { "id": 1 },
+    "address": { "id": 1 },
+    "paymentMethod": "COD",
+    "trackingId": "TRK-20260718-001-UPD"
+  }
+}

@@ -1,0 +1,25 @@
+meta {
+  name: Update Address
+  type: http
+  seq: 5
+}
+
+put {
+  url: {{baseUrl}}/api/addresses/1
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "user": { "id": 1 },
+    "addressLine": "15 Mount Road",
+    "contactNumber": 9876543299,
+    "district": "Chennai",
+    "city": "Chennai",
+    "state": "Tamil Nadu",
+    "country": "India",
+    "pincode": "600006",
+    "landmark": "Near YMCA"
+  }
+}

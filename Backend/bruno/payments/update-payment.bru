@@ -1,0 +1,18 @@
+meta {
+  name: Update Payment
+  type: http
+  seq: 5
+}
+
+put {
+  url: {{baseUrl}}/api/payments/1
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "amount": 8000.00,
+    "paymentMethod": "Net Banking"
+  }
+}
