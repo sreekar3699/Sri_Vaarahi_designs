@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { Page, Category, Subcategory, Product, CartItem } from './types';
 import { fallbackCategories, fallbackSubcategories, fallbackProducts } from './data/mockData';
+import { getCurrentUser, AuthUser } from './services/authService';
 import {
   fetchCategories,
   fetchSubcategories,
@@ -18,6 +19,8 @@ import ProductDetail from './pages/ProductDetail';
 import Cart from './pages/Cart';
 import Auth from './pages/Auth';
 import Admin from './pages/Admin';
+import Profile from './pages/Profile';
+import PhoneRegistration from './pages/PhoneRegistration';
 
 export default function App() {
   // ─── Navigation state ───
@@ -26,6 +29,7 @@ export default function App() {
   const [selectedSubcategoryId, setSelectedSubcategoryId] = useState<number | null>(null);
   const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [authUser, setAuthUser] = useState<AuthUser | null>(null);
 
   // ─── Data state (fetched from API or fallback) ───
   const [categories, setCategories] = useState<Category[]>([]);
@@ -37,11 +41,36 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // ─── Fetch initial data from backend (with fallback to mock data) ───
+  // ─── Restore session & fetch initial data on mount ───
   useEffect(() => {
-    async function loadData() {
+    async function init() {
       setIsLoading(true);
       setError(null);
+
+      // 1. Always try to restore the backend session (persists across page refreshes)
+      const sessionUser = await getCurrentUser();
+      if (sessionUser) {
+        setAuthUser(sessionUser);
+        setIsAuthenticated(true);
+      }
+
+      // 2. Check if this is a fresh OAuth2 redirect from Google
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('oauth2') === 'success') {
+        // Fetch user in case session check above didn't catch it yet
+        const oauthUser = sessionUser || await getCurrentUser();
+        if (oauthUser) {
+          setAuthUser(oauthUser);
+          setIsAuthenticated(true);
+          // If no phone number, prompt for registration
+          if (!oauthUser.phone) {
+            setCurrentPage('phone-registration');
+          }
+        }
+        window.history.replaceState({}, document.title, '/');
+      }
+
+      // 3. Fetch product/category data
       try {
         const [cats, subs, prods] = await Promise.all([
           fetchCategories(),
@@ -53,7 +82,6 @@ export default function App() {
         setProducts(prods);
       } catch (err) {
         console.warn('Backend unreachable, using fallback data:', err);
-        // Fall back to mock data so the frontend works without the backend
         setCategories(fallbackCategories);
         setSubcategories(fallbackSubcategories);
         setProducts(fallbackProducts);
@@ -62,7 +90,7 @@ export default function App() {
         setIsLoading(false);
       }
     }
-    loadData();
+    init();
   }, []);
 
   // ─── Navigation ───
@@ -207,6 +235,7 @@ export default function App() {
         categories={categories}
         subcategories={subcategories}
         isAuthenticated={isAuthenticated}
+        authUser={authUser}
         onSearch={handleSearch}
       />
 
@@ -250,6 +279,22 @@ export default function App() {
 
         {currentPage === 'auth' && (
           <Auth navigate={navigate} onSignIn={() => setIsAuthenticated(true)} />
+        )}
+
+        {currentPage === 'profile' && authUser && (
+          <Profile
+            navigate={navigate}
+            authUser={authUser}
+            onLogout={() => { setIsAuthenticated(false); setAuthUser(null); }}
+          />
+        )}
+
+        {currentPage === 'phone-registration' && authUser && (
+          <PhoneRegistration
+            navigate={navigate}
+            userName={authUser.name}
+            onPhoneSaved={(phone) => setAuthUser(prev => prev ? { ...prev, phone } : prev)}
+          />
         )}
 
         {currentPage === 'admin' && (
