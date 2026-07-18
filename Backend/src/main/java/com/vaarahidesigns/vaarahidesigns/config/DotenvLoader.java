@@ -27,6 +27,16 @@ public class DotenvLoader {
             if (dbPassword != null) {
                 System.setProperty("DB_PASSWORD", dbPassword);
             }
+
+            String razorpayKeyId = dotenv.get("RAZORPAY_KEY_ID");
+            if (razorpayKeyId != null) {
+                System.setProperty("RAZORPAY_KEY_ID", razorpayKeyId);
+            }
+
+            String razorpayKeySecret = dotenv.get("RAZORPAY_KEY_SECRET");
+            if (razorpayKeySecret != null) {
+                System.setProperty("RAZORPAY_KEY_SECRET", razorpayKeySecret);
+            }
         } catch (Exception e) {
             System.err.println("Could not load .env file: " + e.getMessage());
         }
