@@ -3,7 +3,7 @@ spring:
     name: vaarahidesigns
   datasource:
     url: jdbc:postgresql://localhost:5432/vaarahidesigns
-    username: sreekarchowdhary
+    username: abdulafroz0001
     password: ""
     driver-class-name: org.postgresql.Driver
   jpa:
