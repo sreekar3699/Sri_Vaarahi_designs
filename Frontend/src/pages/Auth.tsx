@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { Mail, Lock, Eye, EyeOff, ArrowRight, Sparkles, ShieldCheck } from 'lucide-react';
 import { Page } from '../types';
 import { createUser, getUserByEmail } from '../services/api';
+import { signInWithGoogle } from '../services/authService';
 
 interface AuthProps {
   navigate: (page: Page, opts?: { categoryId?: number; subcategoryId?: number; productId?: number }) => void;
@@ -94,9 +95,9 @@ export default function Auth({ navigate, onSignIn }: AuthProps) {
             <p className="text-sm text-forest-500 mt-1">Sign in to track orders & save favorites</p>
           </div>
 
-          {/* Google */}
+          {/* Google OAuth2 Login */}
           <button
-            onClick={() => { onSignIn(); navigate('home'); }}
+            onClick={() => signInWithGoogle()}
             className="w-full py-3.5 border-2 border-forest-200 hover:border-forest-400 hover:bg-cream-50 rounded-xl font-medium text-forest-800 flex items-center justify-center gap-3 transition-all"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">

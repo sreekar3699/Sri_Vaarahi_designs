@@ -26,6 +26,12 @@ public class User {
 
     private String email;
 
+    private String provider;       // e.g. "google", "local"
+
+    private String providerId;     // Google's unique sub/id for this user
+
+    private String picture;        // Profile picture URL from Google
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Address> addresses = new ArrayList<>();
 

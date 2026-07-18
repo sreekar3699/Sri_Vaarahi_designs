@@ -52,7 +52,9 @@ export type Page =
   | 'product'
   | 'cart'
   | 'auth'
-  | 'admin';
+  | 'admin'
+  | 'profile'
+  | 'phone-registration';
 
 // Static category images fallback (backend Category has no image field yet)
 export const CATEGORY_IMAGES: Record<number, string> = {
