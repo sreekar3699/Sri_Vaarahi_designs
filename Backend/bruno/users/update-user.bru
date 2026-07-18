@@ -1,0 +1,19 @@
+meta {
+  name: Update User
+  type: http
+  seq: 6
+}
+
+put {
+  url: {{baseUrl}}/api/users/1
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "name": "Priya Sharma Updated",
+    "email": "priya.updated@example.com",
+    "phnum": 9876543211
+  }
+}

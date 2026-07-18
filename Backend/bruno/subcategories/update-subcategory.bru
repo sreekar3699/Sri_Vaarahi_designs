@@ -1,0 +1,18 @@
+meta {
+  name: Update Subcategory
+  type: http
+  seq: 5
+}
+
+put {
+  url: {{baseUrl}}/api/subcategories/1
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "scName": "Bridal Kanjivaram",
+    "category": { "id": 1 }
+  }
+}

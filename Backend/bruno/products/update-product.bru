@@ -1,0 +1,24 @@
+meta {
+  name: Update Product
+  type: http
+  seq: 7
+}
+
+put {
+  url: {{baseUrl}}/api/products/1
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "title": "Pure Kanjivaram Silk Saree - Updated",
+    "description": "Updated description",
+    "price": 9000.00,
+    "discount": 5,
+    "availableStock": 20,
+    "images": ["https://example.com/img1.jpg"],
+    "category": { "id": 1 },
+    "subcategory": { "id": 1 }
+  }
+}

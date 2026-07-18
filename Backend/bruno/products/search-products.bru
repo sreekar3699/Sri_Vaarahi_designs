@@ -1,0 +1,15 @@
+meta {
+  name: Search Products by Title
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{baseUrl}}/api/products/search?title=kanjivaram
+  body: none
+  auth: none
+}
+
+params:query {
+  title: kanjivaram
+}

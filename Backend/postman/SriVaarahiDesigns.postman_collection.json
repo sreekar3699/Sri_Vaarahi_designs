@@ -1,17 +1,10 @@
 {
     "info": {
+        "_postman_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
         "name": "Sri Vaarahi Designs API",
-        "_postman_id": "sri-vaarahi-designs-api",
-        "description": "Complete REST API collection for the Sri Vaarahi Designs backend",
+        "description": "Complete REST API collection for Sri Vaarahi Designs backend",
         "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
     },
-    "variable": [
-        {
-            "key": "baseUrl",
-            "value": "http://localhost:8080",
-            "type": "string"
-        }
-    ],
     "item": [
         {
             "name": "Users",
@@ -26,19 +19,26 @@
                                 "value": "application/json"
                             }
                         ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n\t\"name\": \"Priya Sharma\",\n\t\"email\": \"priya@example.com\",\n\t\"phnum\": 9876543210\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
                         "url": {
-                            "raw": "{{baseUrl}}/api/users",
+                            "raw": "http://localhost:8080/api/users",
+                            "protocol": "http",
                             "host": [
-                                "{{baseUrl}}"
+                                "localhost"
                             ],
+                            "port": "8080",
                             "path": [
                                 "api",
                                 "users"
                             ]
-                        },
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n  \"name\": \"Priya Sharma\",\n  \"email\": \"priya@example.com\",\n  \"phnum\": 9876543210\n}"
                         }
                     }
                 },
@@ -46,11 +46,14 @@
                     "name": "Get All Users",
                     "request": {
                         "method": "GET",
+                        "header": [],
                         "url": {
-                            "raw": "{{baseUrl}}/api/users",
+                            "raw": "http://localhost:8080/api/users",
+                            "protocol": "http",
                             "host": [
-                                "{{baseUrl}}"
+                                "localhost"
                             ],
+                            "port": "8080",
                             "path": [
                                 "api",
                                 "users"
@@ -62,11 +65,14 @@
                     "name": "Get User by ID",
                     "request": {
                         "method": "GET",
+                        "header": [],
                         "url": {
-                            "raw": "{{baseUrl}}/api/users/1",
+                            "raw": "http://localhost:8080/api/users/1",
+                            "protocol": "http",
                             "host": [
-                                "{{baseUrl}}"
+                                "localhost"
                             ],
+                            "port": "8080",
                             "path": [
                                 "api",
                                 "users",
@@ -79,11 +85,14 @@
                     "name": "Get User by Email",
                     "request": {
                         "method": "GET",
+                        "header": [],
                         "url": {
-                            "raw": "{{baseUrl}}/api/users/email/priya@example.com",
+                            "raw": "http://localhost:8080/api/users/email/priya@example.com",
+                            "protocol": "http",
                             "host": [
-                                "{{baseUrl}}"
+                                "localhost"
                             ],
+                            "port": "8080",
                             "path": [
                                 "api",
                                 "users",
@@ -97,11 +106,14 @@
                     "name": "Get User by Phone",
                     "request": {
                         "method": "GET",
+                        "header": [],
                         "url": {
-                            "raw": "{{baseUrl}}/api/users/phone/9876543210",
+                            "raw": "http://localhost:8080/api/users/phone/9876543210",
+                            "protocol": "http",
                             "host": [
-                                "{{baseUrl}}"
+                                "localhost"
                             ],
+                            "port": "8080",
                             "path": [
                                 "api",
                                 "users",
@@ -121,20 +133,27 @@
                                 "value": "application/json"
                             }
                         ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n\t\"name\": \"Priya Sharma Updated\",\n\t\"email\": \"priya.updated@example.com\",\n\t\"phnum\": 9876543211\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
                         "url": {
-                            "raw": "{{baseUrl}}/api/users/1",
+                            "raw": "http://localhost:8080/api/users/1",
+                            "protocol": "http",
                             "host": [
-                                "{{baseUrl}}"
+                                "localhost"
                             ],
+                            "port": "8080",
                             "path": [
                                 "api",
                                 "users",
                                 "1"
                             ]
-                        },
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n  \"name\": \"Priya Sharma Updated\",\n  \"email\": \"priya.updated@example.com\",\n  \"phnum\": 9876543211\n}"
                         }
                     }
                 },
@@ -142,11 +161,14 @@
                     "name": "Delete User",
                     "request": {
                         "method": "DELETE",
+                        "header": [],
                         "url": {
-                            "raw": "{{baseUrl}}/api/users/1",
+                            "raw": "http://localhost:8080/api/users/1",
+                            "protocol": "http",
                             "host": [
-                                "{{baseUrl}}"
+                                "localhost"
                             ],
+                            "port": "8080",
                             "path": [
                                 "api",
                                 "users",
@@ -170,19 +192,26 @@
                                 "value": "application/json"
                             }
                         ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n\t\"user\": { \"id\": 1 },\n\t\"addressLine\": \"12 Anna Salai\",\n\t\"contactNumber\": 9876543210,\n\t\"district\": \"Chennai\",\n\t\"city\": \"Chennai\",\n\t\"state\": \"Tamil Nadu\",\n\t\"country\": \"India\",\n\t\"pincode\": \"600002\",\n\t\"landmark\": \"Near Central Station\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
                         "url": {
-                            "raw": "{{baseUrl}}/api/addresses",
+                            "raw": "http://localhost:8080/api/addresses",
+                            "protocol": "http",
                             "host": [
-                                "{{baseUrl}}"
+                                "localhost"
                             ],
+                            "port": "8080",
                             "path": [
                                 "api",
                                 "addresses"
                             ]
-                        },
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n  \"user\": {\"id\": 1},\n  \"addressLine\": \"12 Anna Salai\",\n  \"contactNumber\": 9876543210,\n  \"district\": \"Chennai\",\n  \"city\": \"Chennai\",\n  \"state\": \"Tamil Nadu\",\n  \"country\": \"India\",\n  \"pincode\": \"600002\",\n  \"landmark\": \"Near Central Station\"\n}"
                         }
                     }
                 },
@@ -190,11 +219,14 @@
                     "name": "Get All Addresses",
                     "request": {
                         "method": "GET",
+                        "header": [],
                         "url": {
-                            "raw": "{{baseUrl}}/api/addresses",
+                            "raw": "http://localhost:8080/api/addresses",
+                            "protocol": "http",
                             "host": [
-                                "{{baseUrl}}"
+                                "localhost"
                             ],
+                            "port": "8080",
                             "path": [
                                 "api",
                                 "addresses"
@@ -206,11 +238,14 @@
                     "name": "Get Address by ID",
                     "request": {
                         "method": "GET",
+                        "header": [],
                         "url": {
-                            "raw": "{{baseUrl}}/api/addresses/1",
+                            "raw": "http://localhost:8080/api/addresses/1",
+                            "protocol": "http",
                             "host": [
-                                "{{baseUrl}}"
+                                "localhost"
                             ],
+                            "port": "8080",
                             "path": [
                                 "api",
                                 "addresses",
@@ -223,11 +258,14 @@
                     "name": "Get Addresses by User ID",
                     "request": {
                         "method": "GET",
+                        "header": [],
                         "url": {
-                            "raw": "{{baseUrl}}/api/addresses/user/1",
+                            "raw": "http://localhost:8080/api/addresses/user/1",
+                            "protocol": "http",
                             "host": [
-                                "{{baseUrl}}"
+                                "localhost"
                             ],
+                            "port": "8080",
                             "path": [
                                 "api",
                                 "addresses",
@@ -247,20 +285,27 @@
                                 "value": "application/json"
                             }
                         ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n\t\"user\": { \"id\": 1 },\n\t\"addressLine\": \"15 Mount Road\",\n\t\"contactNumber\": 9876543299,\n\t\"district\": \"Chennai\",\n\t\"city\": \"Chennai\",\n\t\"state\": \"Tamil Nadu\",\n\t\"country\": \"India\",\n\t\"pincode\": \"600006\",\n\t\"landmark\": \"Near YMCA\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
                         "url": {
-                            "raw": "{{baseUrl}}/api/addresses/1",
+                            "raw": "http://localhost:8080/api/addresses/1",
+                            "protocol": "http",
                             "host": [
-                                "{{baseUrl}}"
+                                "localhost"
                             ],
+                            "port": "8080",
                             "path": [
                                 "api",
                                 "addresses",
                                 "1"
                             ]
-                        },
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n  \"user\": {\"id\": 1},\n  \"addressLine\": \"15 Mount Road\",\n  \"contactNumber\": 9876543299,\n  \"district\": \"Chennai\",\n  \"city\": \"Chennai\",\n  \"state\": \"Tamil Nadu\",\n  \"country\": \"India\",\n  \"pincode\": \"600006\",\n  \"landmark\": \"Near YMCA\"\n}"
                         }
                     }
                 },
@@ -268,11 +313,14 @@
                     "name": "Delete Address",
                     "request": {
                         "method": "DELETE",
+                        "header": [],
                         "url": {
-                            "raw": "{{baseUrl}}/api/addresses/1",
+                            "raw": "http://localhost:8080/api/addresses/1",
+                            "protocol": "http",
                             "host": [
-                                "{{baseUrl}}"
+                                "localhost"
                             ],
+                            "port": "8080",
                             "path": [
                                 "api",
                                 "addresses",
@@ -296,19 +344,26 @@
                                 "value": "application/json"
                             }
                         ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n\t\"name\": \"Sarees\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
                         "url": {
-                            "raw": "{{baseUrl}}/api/categories",
+                            "raw": "http://localhost:8080/api/categories",
+                            "protocol": "http",
                             "host": [
-                                "{{baseUrl}}"
+                                "localhost"
                             ],
+                            "port": "8080",
                             "path": [
                                 "api",
                                 "categories"
                             ]
-                        },
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n  \"name\": \"Sarees\"\n}"
                         }
                     }
                 },
@@ -316,11 +371,14 @@
                     "name": "Get All Categories",
                     "request": {
                         "method": "GET",
+                        "header": [],
                         "url": {
-                            "raw": "{{baseUrl}}/api/categories",
+                            "raw": "http://localhost:8080/api/categories",
+                            "protocol": "http",
                             "host": [
-                                "{{baseUrl}}"
+                                "localhost"
                             ],
+                            "port": "8080",
                             "path": [
                                 "api",
                                 "categories"
@@ -332,11 +390,14 @@
                     "name": "Get Category by ID",
                     "request": {
                         "method": "GET",
+                        "header": [],
                         "url": {
-                            "raw": "{{baseUrl}}/api/categories/1",
+                            "raw": "http://localhost:8080/api/categories/1",
+                            "protocol": "http",
                             "host": [
-                                "{{baseUrl}}"
+                                "localhost"
                             ],
+                            "port": "8080",
                             "path": [
                                 "api",
                                 "categories",
@@ -349,11 +410,14 @@
                     "name": "Get Category by Name",
                     "request": {
                         "method": "GET",
+                        "header": [],
                         "url": {
-                            "raw": "{{baseUrl}}/api/categories/name/Sarees",
+                            "raw": "http://localhost:8080/api/categories/name/Sarees",
+                            "protocol": "http",
                             "host": [
-                                "{{baseUrl}}"
+                                "localhost"
                             ],
+                            "port": "8080",
                             "path": [
                                 "api",
                                 "categories",
@@ -373,20 +437,27 @@
                                 "value": "application/json"
                             }
                         ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n\t\"name\": \"Silk Sarees\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
                         "url": {
-                            "raw": "{{baseUrl}}/api/categories/1",
+                            "raw": "http://localhost:8080/api/categories/1",
+                            "protocol": "http",
                             "host": [
-                                "{{baseUrl}}"
+                                "localhost"
                             ],
+                            "port": "8080",
                             "path": [
                                 "api",
                                 "categories",
                                 "1"
                             ]
-                        },
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n  \"name\": \"Silk Sarees\"\n}"
                         }
                     }
                 },
@@ -394,11 +465,14 @@
                     "name": "Delete Category",
                     "request": {
                         "method": "DELETE",
+                        "header": [],
                         "url": {
-                            "raw": "{{baseUrl}}/api/categories/1",
+                            "raw": "http://localhost:8080/api/categories/1",
+                            "protocol": "http",
                             "host": [
-                                "{{baseUrl}}"
+                                "localhost"
                             ],
+                            "port": "8080",
                             "path": [
                                 "api",
                                 "categories",
@@ -422,19 +496,26 @@
                                 "value": "application/json"
                             }
                         ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n\t\"scName\": \"Kanjivaram\",\n\t\"category\": { \"id\": 1 }\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
                         "url": {
-                            "raw": "{{baseUrl}}/api/subcategories",
+                            "raw": "http://localhost:8080/api/subcategories",
+                            "protocol": "http",
                             "host": [
-                                "{{baseUrl}}"
+                                "localhost"
                             ],
+                            "port": "8080",
                             "path": [
                                 "api",
                                 "subcategories"
                             ]
-                        },
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n  \"scName\": \"Kanjivaram\",\n  \"category\": {\"id\": 1}\n}"
                         }
                     }
                 },
@@ -442,11 +523,14 @@
                     "name": "Get All Subcategories",
                     "request": {
                         "method": "GET",
+                        "header": [],
                         "url": {
-                            "raw": "{{baseUrl}}/api/subcategories",
+                            "raw": "http://localhost:8080/api/subcategories",
+                            "protocol": "http",
                             "host": [
-                                "{{baseUrl}}"
+                                "localhost"
                             ],
+                            "port": "8080",
                             "path": [
                                 "api",
                                 "subcategories"
@@ -458,11 +542,14 @@
                     "name": "Get Subcategory by ID",
                     "request": {
                         "method": "GET",
+                        "header": [],
                         "url": {
-                            "raw": "{{baseUrl}}/api/subcategories/1",
+                            "raw": "http://localhost:8080/api/subcategories/1",
+                            "protocol": "http",
                             "host": [
-                                "{{baseUrl}}"
+                                "localhost"
                             ],
+                            "port": "8080",
                             "path": [
                                 "api",
                                 "subcategories",
@@ -475,11 +562,14 @@
                     "name": "Get Subcategories by Category ID",
                     "request": {
                         "method": "GET",
+                        "header": [],
                         "url": {
-                            "raw": "{{baseUrl}}/api/subcategories/category/1",
+                            "raw": "http://localhost:8080/api/subcategories/category/1",
+                            "protocol": "http",
                             "host": [
-                                "{{baseUrl}}"
+                                "localhost"
                             ],
+                            "port": "8080",
                             "path": [
                                 "api",
                                 "subcategories",
@@ -499,20 +589,27 @@
                                 "value": "application/json"
                             }
                         ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n\t\"scName\": \"Bridal Kanjivaram\",\n\t\"category\": { \"id\": 1 }\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
                         "url": {
-                            "raw": "{{baseUrl}}/api/subcategories/1",
+                            "raw": "http://localhost:8080/api/subcategories/1",
+                            "protocol": "http",
                             "host": [
-                                "{{baseUrl}}"
+                                "localhost"
                             ],
+                            "port": "8080",
                             "path": [
                                 "api",
                                 "subcategories",
                                 "1"
                             ]
-                        },
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n  \"scName\": \"Bridal Kanjivaram\",\n  \"category\": {\"id\": 1}\n}"
                         }
                     }
                 },
@@ -520,11 +617,14 @@
                     "name": "Delete Subcategory",
                     "request": {
                         "method": "DELETE",
+                        "header": [],
                         "url": {
-                            "raw": "{{baseUrl}}/api/subcategories/1",
+                            "raw": "http://localhost:8080/api/subcategories/1",
+                            "protocol": "http",
                             "host": [
-                                "{{baseUrl}}"
+                                "localhost"
                             ],
+                            "port": "8080",
                             "path": [
                                 "api",
                                 "subcategories",
@@ -548,19 +648,26 @@
                                 "value": "application/json"
                             }
                         ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n\t\"title\": \"Pure Kanjivaram Silk Saree\",\n\t\"description\": \"Handwoven Kanjivaram silk saree with gold zari work\",\n\t\"price\": 8500.00,\n\t\"discount\": 10,\n\t\"availableStock\": 25,\n\t\"images\": [\"https://example.com/img1.jpg\"],\n\t\"category\": { \"id\": 1 },\n\t\"subcategory\": { \"id\": 1 }\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
                         "url": {
-                            "raw": "{{baseUrl}}/api/products",
+                            "raw": "http://localhost:8080/api/products",
+                            "protocol": "http",
                             "host": [
-                                "{{baseUrl}}"
+                                "localhost"
                             ],
+                            "port": "8080",
                             "path": [
                                 "api",
                                 "products"
                             ]
-                        },
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n  \"title\": \"Pure Kanjivaram Silk Saree\",\n  \"description\": \"Authentic handwoven Kanjivaram silk saree with gold zari work\",\n  \"price\": 8500.00,\n  \"discount\": 10,\n  \"availableStock\": 25,\n  \"images\": [\"https://example.com/img1.jpg\", \"https://example.com/img2.jpg\"],\n  \"category\": {\"id\": 1},\n  \"subcategory\": {\"id\": 1}\n}"
                         }
                     }
                 },
@@ -568,11 +675,14 @@
                     "name": "Get All Products",
                     "request": {
                         "method": "GET",
+                        "header": [],
                         "url": {
-                            "raw": "{{baseUrl}}/api/products",
+                            "raw": "http://localhost:8080/api/products",
+                            "protocol": "http",
                             "host": [
-                                "{{baseUrl}}"
+                                "localhost"
                             ],
+                            "port": "8080",
                             "path": [
                                 "api",
                                 "products"
@@ -584,11 +694,14 @@
                     "name": "Get Product by ID",
                     "request": {
                         "method": "GET",
+                        "header": [],
                         "url": {
-                            "raw": "{{baseUrl}}/api/products/1",
+                            "raw": "http://localhost:8080/api/products/1",
+                            "protocol": "http",
                             "host": [
-                                "{{baseUrl}}"
+                                "localhost"
                             ],
+                            "port": "8080",
                             "path": [
                                 "api",
                                 "products",
@@ -601,11 +714,14 @@
                     "name": "Get Products by Category",
                     "request": {
                         "method": "GET",
+                        "header": [],
                         "url": {
-                            "raw": "{{baseUrl}}/api/products/category/1",
+                            "raw": "http://localhost:8080/api/products/category/1",
+                            "protocol": "http",
                             "host": [
-                                "{{baseUrl}}"
+                                "localhost"
                             ],
+                            "port": "8080",
                             "path": [
                                 "api",
                                 "products",
@@ -619,11 +735,14 @@
                     "name": "Get Products by Subcategory",
                     "request": {
                         "method": "GET",
+                        "header": [],
                         "url": {
-                            "raw": "{{baseUrl}}/api/products/subcategory/1",
+                            "raw": "http://localhost:8080/api/products/subcategory/1",
+                            "protocol": "http",
                             "host": [
-                                "{{baseUrl}}"
+                                "localhost"
                             ],
+                            "port": "8080",
                             "path": [
                                 "api",
                                 "products",
@@ -637,11 +756,14 @@
                     "name": "Search Products by Title",
                     "request": {
                         "method": "GET",
+                        "header": [],
                         "url": {
-                            "raw": "{{baseUrl}}/api/products/search?title=kanjivaram",
+                            "raw": "http://localhost:8080/api/products/search?title=kanjivaram",
+                            "protocol": "http",
                             "host": [
-                                "{{baseUrl}}"
+                                "localhost"
                             ],
+                            "port": "8080",
                             "path": [
                                 "api",
                                 "products",
@@ -666,20 +788,27 @@
                                 "value": "application/json"
                             }
                         ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n\t\"title\": \"Pure Kanjivaram Silk Saree - Updated\",\n\t\"description\": \"Updated description\",\n\t\"price\": 9000.00,\n\t\"discount\": 5,\n\t\"availableStock\": 20,\n\t\"images\": [\"https://example.com/img1.jpg\"],\n\t\"category\": { \"id\": 1 },\n\t\"subcategory\": { \"id\": 1 }\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
                         "url": {
-                            "raw": "{{baseUrl}}/api/products/1",
+                            "raw": "http://localhost:8080/api/products/1",
+                            "protocol": "http",
                             "host": [
-                                "{{baseUrl}}"
+                                "localhost"
                             ],
+                            "port": "8080",
                             "path": [
                                 "api",
                                 "products",
                                 "1"
                             ]
-                        },
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n  \"title\": \"Pure Kanjivaram Silk Saree - Updated\",\n  \"description\": \"Updated description\",\n  \"price\": 9000.00,\n  \"discount\": 5,\n  \"availableStock\": 20,\n  \"images\": [\"https://example.com/img1.jpg\"],\n  \"category\": {\"id\": 1},\n  \"subcategory\": {\"id\": 1}\n}"
                         }
                     }
                 },
@@ -687,11 +816,14 @@
                     "name": "Delete Product",
                     "request": {
                         "method": "DELETE",
+                        "header": [],
                         "url": {
-                            "raw": "{{baseUrl}}/api/products/1",
+                            "raw": "http://localhost:8080/api/products/1",
+                            "protocol": "http",
                             "host": [
-                                "{{baseUrl}}"
+                                "localhost"
                             ],
+                            "port": "8080",
                             "path": [
                                 "api",
                                 "products",
@@ -715,19 +847,26 @@
                                 "value": "application/json"
                             }
                         ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n\t\"user\": { \"id\": 1 },\n\t\"product\": { \"id\": 1 },\n\t\"productReview\": \"Stunning saree! Exquisite quality.\",\n\t\"ratingStars\": 5\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
                         "url": {
-                            "raw": "{{baseUrl}}/api/reviews",
+                            "raw": "http://localhost:8080/api/reviews",
+                            "protocol": "http",
                             "host": [
-                                "{{baseUrl}}"
+                                "localhost"
                             ],
+                            "port": "8080",
                             "path": [
                                 "api",
                                 "reviews"
                             ]
-                        },
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n  \"user\": {\"id\": 1},\n  \"product\": {\"id\": 1},\n  \"productReview\": \"Absolutely stunning saree! The quality is exquisite.\",\n  \"ratingStars\": 5\n}"
                         }
                     }
                 },
@@ -735,11 +874,14 @@
                     "name": "Get All Reviews",
                     "request": {
                         "method": "GET",
+                        "header": [],
                         "url": {
-                            "raw": "{{baseUrl}}/api/reviews",
+                            "raw": "http://localhost:8080/api/reviews",
+                            "protocol": "http",
                             "host": [
-                                "{{baseUrl}}"
+                                "localhost"
                             ],
+                            "port": "8080",
                             "path": [
                                 "api",
                                 "reviews"
@@ -751,11 +893,14 @@
                     "name": "Get Review by ID",
                     "request": {
                         "method": "GET",
+                        "header": [],
                         "url": {
-                            "raw": "{{baseUrl}}/api/reviews/1",
+                            "raw": "http://localhost:8080/api/reviews/1",
+                            "protocol": "http",
                             "host": [
-                                "{{baseUrl}}"
+                                "localhost"
                             ],
+                            "port": "8080",
                             "path": [
                                 "api",
                                 "reviews",
@@ -768,11 +913,14 @@
                     "name": "Get Reviews by Product ID",
                     "request": {
                         "method": "GET",
+                        "header": [],
                         "url": {
-                            "raw": "{{baseUrl}}/api/reviews/product/1",
+                            "raw": "http://localhost:8080/api/reviews/product/1",
+                            "protocol": "http",
                             "host": [
-                                "{{baseUrl}}"
+                                "localhost"
                             ],
+                            "port": "8080",
                             "path": [
                                 "api",
                                 "reviews",
@@ -786,11 +934,14 @@
                     "name": "Get Reviews by User ID",
                     "request": {
                         "method": "GET",
+                        "header": [],
                         "url": {
-                            "raw": "{{baseUrl}}/api/reviews/user/1",
+                            "raw": "http://localhost:8080/api/reviews/user/1",
+                            "protocol": "http",
                             "host": [
-                                "{{baseUrl}}"
+                                "localhost"
                             ],
+                            "port": "8080",
                             "path": [
                                 "api",
                                 "reviews",
@@ -810,20 +961,27 @@
                                 "value": "application/json"
                             }
                         ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n\t\"productReview\": \"Great saree, loved the packaging!\",\n\t\"ratingStars\": 4\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
                         "url": {
-                            "raw": "{{baseUrl}}/api/reviews/1",
+                            "raw": "http://localhost:8080/api/reviews/1",
+                            "protocol": "http",
                             "host": [
-                                "{{baseUrl}}"
+                                "localhost"
                             ],
+                            "port": "8080",
                             "path": [
                                 "api",
                                 "reviews",
                                 "1"
                             ]
-                        },
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n  \"productReview\": \"Great saree, loved the packaging too!\",\n  \"ratingStars\": 4\n}"
                         }
                     }
                 },
@@ -831,11 +989,14 @@
                     "name": "Delete Review",
                     "request": {
                         "method": "DELETE",
+                        "header": [],
                         "url": {
-                            "raw": "{{baseUrl}}/api/reviews/1",
+                            "raw": "http://localhost:8080/api/reviews/1",
+                            "protocol": "http",
                             "host": [
-                                "{{baseUrl}}"
+                                "localhost"
                             ],
+                            "port": "8080",
                             "path": [
                                 "api",
                                 "reviews",
@@ -859,19 +1020,26 @@
                                 "value": "application/json"
                             }
                         ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n\t\"user\": { \"id\": 1 },\n\t\"product\": { \"id\": 1 },\n\t\"address\": { \"id\": 1 },\n\t\"paymentMethod\": \"UPI\",\n\t\"trackingId\": \"TRK-20260718-001\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
                         "url": {
-                            "raw": "{{baseUrl}}/api/orders",
+                            "raw": "http://localhost:8080/api/orders",
+                            "protocol": "http",
                             "host": [
-                                "{{baseUrl}}"
+                                "localhost"
                             ],
+                            "port": "8080",
                             "path": [
                                 "api",
                                 "orders"
                             ]
-                        },
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n  \"user\": {\"id\": 1},\n  \"product\": {\"id\": 1},\n  \"address\": {\"id\": 1},\n  \"paymentMethod\": \"UPI\",\n  \"trackingId\": \"TRK-20260718-001\"\n}"
                         }
                     }
                 },
@@ -879,11 +1047,14 @@
                     "name": "Get All Orders",
                     "request": {
                         "method": "GET",
+                        "header": [],
                         "url": {
-                            "raw": "{{baseUrl}}/api/orders",
+                            "raw": "http://localhost:8080/api/orders",
+                            "protocol": "http",
                             "host": [
-                                "{{baseUrl}}"
+                                "localhost"
                             ],
+                            "port": "8080",
                             "path": [
                                 "api",
                                 "orders"
@@ -895,11 +1066,14 @@
                     "name": "Get Order by ID",
                     "request": {
                         "method": "GET",
+                        "header": [],
                         "url": {
-                            "raw": "{{baseUrl}}/api/orders/1",
+                            "raw": "http://localhost:8080/api/orders/1",
+                            "protocol": "http",
                             "host": [
-                                "{{baseUrl}}"
+                                "localhost"
                             ],
+                            "port": "8080",
                             "path": [
                                 "api",
                                 "orders",
@@ -912,11 +1086,14 @@
                     "name": "Get Order by Tracking ID",
                     "request": {
                         "method": "GET",
+                        "header": [],
                         "url": {
-                            "raw": "{{baseUrl}}/api/orders/tracking/TRK-20260718-001",
+                            "raw": "http://localhost:8080/api/orders/tracking/TRK-20260718-001",
+                            "protocol": "http",
                             "host": [
-                                "{{baseUrl}}"
+                                "localhost"
                             ],
+                            "port": "8080",
                             "path": [
                                 "api",
                                 "orders",
@@ -930,11 +1107,14 @@
                     "name": "Get Orders by User ID",
                     "request": {
                         "method": "GET",
+                        "header": [],
                         "url": {
-                            "raw": "{{baseUrl}}/api/orders/user/1",
+                            "raw": "http://localhost:8080/api/orders/user/1",
+                            "protocol": "http",
                             "host": [
-                                "{{baseUrl}}"
+                                "localhost"
                             ],
+                            "port": "8080",
                             "path": [
                                 "api",
                                 "orders",
@@ -954,20 +1134,27 @@
                                 "value": "application/json"
                             }
                         ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n\t\"user\": { \"id\": 1 },\n\t\"product\": { \"id\": 1 },\n\t\"address\": { \"id\": 1 },\n\t\"paymentMethod\": \"COD\",\n\t\"trackingId\": \"TRK-20260718-001-UPD\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
                         "url": {
-                            "raw": "{{baseUrl}}/api/orders/1",
+                            "raw": "http://localhost:8080/api/orders/1",
+                            "protocol": "http",
                             "host": [
-                                "{{baseUrl}}"
+                                "localhost"
                             ],
+                            "port": "8080",
                             "path": [
                                 "api",
                                 "orders",
                                 "1"
                             ]
-                        },
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n  \"user\": {\"id\": 1},\n  \"product\": {\"id\": 1},\n  \"address\": {\"id\": 1},\n  \"paymentMethod\": \"COD\",\n  \"trackingId\": \"TRK-20260718-001-UPD\"\n}"
                         }
                     }
                 },
@@ -975,11 +1162,14 @@
                     "name": "Delete Order",
                     "request": {
                         "method": "DELETE",
+                        "header": [],
                         "url": {
-                            "raw": "{{baseUrl}}/api/orders/1",
+                            "raw": "http://localhost:8080/api/orders/1",
+                            "protocol": "http",
                             "host": [
-                                "{{baseUrl}}"
+                                "localhost"
                             ],
+                            "port": "8080",
                             "path": [
                                 "api",
                                 "orders",
@@ -1003,19 +1193,26 @@
                                 "value": "application/json"
                             }
                         ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n\t\"amount\": 7650.00,\n\t\"paymentMethod\": \"UPI\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
                         "url": {
-                            "raw": "{{baseUrl}}/api/payments",
+                            "raw": "http://localhost:8080/api/payments",
+                            "protocol": "http",
                             "host": [
-                                "{{baseUrl}}"
+                                "localhost"
                             ],
+                            "port": "8080",
                             "path": [
                                 "api",
                                 "payments"
                             ]
-                        },
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n  \"amount\": 7650.00,\n  \"paymentMethod\": \"UPI\"\n}"
                         }
                     }
                 },
@@ -1023,11 +1220,14 @@
                     "name": "Get All Payments",
                     "request": {
                         "method": "GET",
+                        "header": [],
                         "url": {
-                            "raw": "{{baseUrl}}/api/payments",
+                            "raw": "http://localhost:8080/api/payments",
+                            "protocol": "http",
                             "host": [
-                                "{{baseUrl}}"
+                                "localhost"
                             ],
+                            "port": "8080",
                             "path": [
                                 "api",
                                 "payments"
@@ -1039,11 +1239,14 @@
                     "name": "Get Payment by ID",
                     "request": {
                         "method": "GET",
+                        "header": [],
                         "url": {
-                            "raw": "{{baseUrl}}/api/payments/1",
+                            "raw": "http://localhost:8080/api/payments/1",
+                            "protocol": "http",
                             "host": [
-                                "{{baseUrl}}"
+                                "localhost"
                             ],
+                            "port": "8080",
                             "path": [
                                 "api",
                                 "payments",
@@ -1056,11 +1259,14 @@
                     "name": "Get Payments by Method",
                     "request": {
                         "method": "GET",
+                        "header": [],
                         "url": {
-                            "raw": "{{baseUrl}}/api/payments/method/UPI",
+                            "raw": "http://localhost:8080/api/payments/method/UPI",
+                            "protocol": "http",
                             "host": [
-                                "{{baseUrl}}"
+                                "localhost"
                             ],
+                            "port": "8080",
                             "path": [
                                 "api",
                                 "payments",
@@ -1080,20 +1286,27 @@
                                 "value": "application/json"
                             }
                         ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n\t\"amount\": 8000.00,\n\t\"paymentMethod\": \"Net Banking\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
                         "url": {
-                            "raw": "{{baseUrl}}/api/payments/1",
+                            "raw": "http://localhost:8080/api/payments/1",
+                            "protocol": "http",
                             "host": [
-                                "{{baseUrl}}"
+                                "localhost"
                             ],
+                            "port": "8080",
                             "path": [
                                 "api",
                                 "payments",
                                 "1"
                             ]
-                        },
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n  \"amount\": 8000.00,\n  \"paymentMethod\": \"Net Banking\"\n}"
                         }
                     }
                 },
@@ -1101,11 +1314,14 @@
                     "name": "Delete Payment",
                     "request": {
                         "method": "DELETE",
+                        "header": [],
                         "url": {
-                            "raw": "{{baseUrl}}/api/payments/1",
+                            "raw": "http://localhost:8080/api/payments/1",
+                            "protocol": "http",
                             "host": [
-                                "{{baseUrl}}"
+                                "localhost"
                             ],
+                            "port": "8080",
                             "path": [
                                 "api",
                                 "payments",

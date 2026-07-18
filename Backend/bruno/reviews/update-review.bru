@@ -1,0 +1,18 @@
+meta {
+  name: Update Review
+  type: http
+  seq: 6
+}
+
+put {
+  url: {{baseUrl}}/api/reviews/1
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "productReview": "Great saree, loved the packaging!",
+    "ratingStars": 4
+  }
+}

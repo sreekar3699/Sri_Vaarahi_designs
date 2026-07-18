@@ -1,0 +1,20 @@
+meta {
+  name: Create Review
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/reviews
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "user": { "id": 1 },
+    "product": { "id": 1 },
+    "productReview": "Stunning saree! Exquisite quality.",
+    "ratingStars": 5
+  }
+}
