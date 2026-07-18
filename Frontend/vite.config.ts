@@ -12,7 +12,7 @@ export default defineConfig({
     host: true,   // listen on 0.0.0.0 — resolves both localhost and 127.0.0.1
     proxy: {
       '/api': {
-        target: 'http://localhost:8000',
+        target: 'http://localhost:8080',
         changeOrigin: true,
       },
     },

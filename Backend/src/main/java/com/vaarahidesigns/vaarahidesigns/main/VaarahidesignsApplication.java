@@ -7,6 +7,8 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.boot.persistence.autoconfigure.EntityScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
+import com.vaarahidesigns.vaarahidesigns.config.DotenvLoader;
+
 @SpringBootApplication
 @ComponentScan(basePackages = "com.vaarahidesigns.vaarahidesigns")
 @EntityScan(basePackages = "com.vaarahidesigns.vaarahidesigns.entity")
@@ -14,6 +16,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 public class VaarahidesignsApplication {
 
 	public static void main(String[] args) {
+		DotenvLoader.loadDotenv();
 		SpringApplication.run(VaarahidesignsApplication.class, args);
 	}
 
