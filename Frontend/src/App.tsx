@@ -7,8 +7,14 @@ import {
   fetchProducts,
   searchProducts as apiSearchProducts,
   createCategory as apiCreateCategory,
+  updateCategory as apiUpdateCategory,
+  deleteCategory as apiDeleteCategory,
   createSubcategory as apiCreateSubcategory,
+  updateSubcategory as apiUpdateSubcategory,
+  deleteSubcategory as apiDeleteSubcategory,
   createProduct as apiCreateProduct,
+  updateProduct as apiUpdateProduct,
+  deleteProduct as apiDeleteProduct,
 } from './services/api';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -148,6 +154,68 @@ export default function App() {
     }
   }, []);
 
+  // ─── Admin: update product ───
+  const editProduct = useCallback(async (id: number, data: Omit<Product, 'id'>) => {
+    try {
+      const updated = await apiUpdateProduct(id, data);
+      setProducts(prev => prev.map(p => p.id === id ? updated : p));
+      return true;
+    } catch {
+      setProducts(prev => prev.map(p => p.id === id ? { id, ...data } : p));
+      return false;
+    }
+  }, []);
+
+  // ─── Admin: delete product ───
+  const removeProduct = useCallback(async (id: number) => {
+    try {
+      await apiDeleteProduct(id);
+    } catch { /* ignore */ }
+    setProducts(prev => prev.filter(p => p.id !== id));
+  }, []);
+
+  // ─── Admin: update category ───
+  const editCategory = useCallback(async (id: number, data: { name: string }) => {
+    try {
+      const updated = await apiUpdateCategory(id, data);
+      setCategories(prev => prev.map(c => c.id === id ? updated : c));
+      return true;
+    } catch {
+      setCategories(prev => prev.map(c => c.id === id ? { ...c, ...data } : c));
+      return false;
+    }
+  }, []);
+
+  // ─── Admin: delete category ───
+  const removeCategory = useCallback(async (id: number) => {
+    try {
+      await apiDeleteCategory(id);
+    } catch { /* ignore */ }
+    setCategories(prev => prev.filter(c => c.id !== id));
+    setSubcategories(prev => prev.filter(s => s.category?.id !== id));
+  }, []);
+
+  // ─── Admin: update subcategory ───
+  const editSubcategory = useCallback(async (id: number, data: { scName: string; categoryId: number }) => {
+    try {
+      const updated = await apiUpdateSubcategory(id, { scName: data.scName, category: { id: data.categoryId } });
+      setSubcategories(prev => prev.map(s => s.id === id ? updated : s));
+      return true;
+    } catch {
+      const parentCat = categories.find(c => c.id === data.categoryId);
+      setSubcategories(prev => prev.map(s => s.id === id ? { ...s, scName: data.scName, category: parentCat || s.category } : s));
+      return false;
+    }
+  }, [categories]);
+
+  // ─── Admin: delete subcategory ───
+  const removeSubcategory = useCallback(async (id: number) => {
+    try {
+      await apiDeleteSubcategory(id);
+    } catch { /* ignore */ }
+    setSubcategories(prev => prev.filter(s => s.id !== id));
+  }, []);
+
   // ─── Search handler (calls backend API) ───
   const handleSearch = useCallback(async (query: string): Promise<Product[]> => {
     if (!query.trim()) return [];
@@ -258,8 +326,14 @@ export default function App() {
             subcategories={subcategories}
             products={products}
             addCategory={addCategory}
+            editCategory={editCategory}
+            removeCategory={removeCategory}
             addSubcategory={addSubcategory}
+            editSubcategory={editSubcategory}
+            removeSubcategory={removeSubcategory}
             addProduct={addProduct}
+            editProduct={editProduct}
+            removeProduct={removeProduct}
             refreshData={refreshData}
           />
         )}

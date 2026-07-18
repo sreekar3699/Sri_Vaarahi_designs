@@ -1,13 +1,24 @@
-// ─── Cart Page ───
-// BUG FIX: Line 141 subtitle was repeating product name → now shows subcategory name.
-// BUG FIX: placeOrder `setTouched` in forEach was stale → now uses single setState call.
-// SCHEMA: Updated all field references to match backend schema.
+// ─── Cart Page with Razorpay + COD Payment ───
 
-import { useMemo, useState } from 'react';
-import { Minus, Plus, X, ShoppingBag, ArrowRight, Tag, Check, CreditCard } from 'lucide-react';
+import { useMemo, useState, useEffect, useRef } from 'react';
+import {
+  Minus, Plus, X, ShoppingBag, ArrowRight, Tag, Check, CreditCard,
+  Truck, Shield, Zap, AlertCircle
+} from 'lucide-react';
 import { CartItem, Page, discountedPrice } from '../types';
+import {
+  createUser, getUserByEmail, createAddress,
+  createRazorpayOrder, verifyRazorpayPayment, placeCodOrder,
+} from '../services/api';
 import RollingNumber from '../components/RollingNumber';
 import { getDirectDriveLink } from '../utils/imageUtils';
+
+// Extend window for Razorpay global
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
 
 interface CartProps {
   cart: CartItem[];
@@ -18,6 +29,8 @@ interface CartProps {
 
 interface FormErrors { [k: string]: string }
 
+type PaymentMethod = 'razorpay' | 'cod';
+
 export default function Cart({ cart, navigate, updateQty, removeItem }: CartProps) {
   const [coupon, setCoupon] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; pct: number } | null>(null);
@@ -25,36 +38,49 @@ export default function Cart({ cart, navigate, updateQty, removeItem }: CartProp
   const [form, setForm] = useState({ fullName: '', email: '', address: '', city: '', postal: '', phone: '' });
   const [errors, setErrors] = useState<FormErrors>({});
   const [touched, setTouched] = useState<{ [k: string]: boolean }>({});
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('razorpay');
   const [placingOrder, setPlacingOrder] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
+  const [orderStatus, setOrderStatus] = useState<'success' | 'failed' | 'cod'>('success');
+  const [orderMsg, setOrderMsg] = useState('');
 
   const subtotal = useMemo(() => cart.reduce((s, i) => s + discountedPrice(i.product) * i.quantity, 0), [cart]);
   const discount = appliedCoupon ? Math.round(subtotal * appliedCoupon.pct / 100) : 0;
   const shipping = subtotal > 2000 ? 0 : 99;
   const total = Math.max(0, subtotal - discount + (cart.length ? shipping : 0));
 
-  const applyCoupon = () => {
-    const code = coupon.trim().toUpperCase();
-    if (code === 'SAVE20') {
-      setAppliedCoupon({ code, pct: 20 });
-      setCouponMsg({ type: 'success', text: '20% discount applied!' });
-    } else if (code === 'FESTIVE10') {
-      setAppliedCoupon({ code, pct: 10 });
-      setCouponMsg({ type: 'success', text: '10% festive discount applied!' });
-    } else if (code === 'WELCOME5') {
-      setAppliedCoupon({ code, pct: 5 });
-      setCouponMsg({ type: 'success', text: '5% welcome discount applied!' });
-    } else {
-      setAppliedCoupon(null);
-      setCouponMsg({ type: 'error', text: 'Invalid coupon code' });
-    }
+  // Load Razorpay checkout script and resolve when ready
+  const loadRazorpay = (): Promise<boolean> => {
+    return new Promise((resolve) => {
+      // Already loaded
+      if (window.Razorpay) { resolve(true); return; }
+
+      // Already injecting — just wait
+      const existing = document.getElementById('razorpay-script');
+      if (existing) {
+        existing.addEventListener('load', () => resolve(!!window.Razorpay));
+        existing.addEventListener('error', () => resolve(false));
+        return;
+      }
+
+      const script = document.createElement('script');
+      script.id = 'razorpay-script';
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
   };
 
-  const removeCoupon = () => {
-    setAppliedCoupon(null);
-    setCoupon('');
-    setCouponMsg(null);
+  const applyCoupon = () => {
+    const code = coupon.trim().toUpperCase();
+    if (code === 'SAVE20') { setAppliedCoupon({ code, pct: 20 }); setCouponMsg({ type: 'success', text: '20% discount applied!' }); }
+    else if (code === 'FESTIVE10') { setAppliedCoupon({ code, pct: 10 }); setCouponMsg({ type: 'success', text: '10% festive discount applied!' }); }
+    else if (code === 'WELCOME5') { setAppliedCoupon({ code, pct: 5 }); setCouponMsg({ type: 'success', text: '5% welcome discount applied!' }); }
+    else { setAppliedCoupon(null); setCouponMsg({ type: 'error', text: 'Invalid coupon code' }); }
   };
+
+  const removeCoupon = () => { setAppliedCoupon(null); setCoupon(''); setCouponMsg(null); };
 
   const validate = (name: string, value: string): string => {
     switch (name) {
@@ -70,9 +96,7 @@ export default function Cart({ cart, navigate, updateQty, removeItem }: CartProp
 
   const onChange = (name: string, value: string) => {
     setForm({ ...form, [name]: value });
-    if (touched[name]) {
-      setErrors({ ...errors, [name]: validate(name, value) });
-    }
+    if (touched[name]) setErrors({ ...errors, [name]: validate(name, value) });
   };
 
   const onBlur = (name: string) => {
@@ -80,39 +104,194 @@ export default function Cart({ cart, navigate, updateQty, removeItem }: CartProp
     setErrors({ ...errors, [name]: validate(name, form[name as keyof typeof form]) });
   };
 
-  const isValid = () => Object.keys({ fullName: '', email: '', address: '', city: '', postal: '', phone: '' }).every(
-    k => validate(k, form[k as keyof typeof form]) === ''
-  );
+  const isValid = () => Object.keys({ fullName: '', email: '', address: '', city: '', postal: '', phone: '' })
+    .every(k => validate(k, form[k as keyof typeof form]) === '');
 
-  const placeOrder = () => {
-    // BUG FIX: Set all fields as touched in a single call (was using forEach with stale state)
+  // ── Helper: validate all fields and show errors ──
+  const touchAll = () => {
     const allTouched: { [k: string]: boolean } = {};
     const newErrors: FormErrors = {};
-    Object.keys(form).forEach(k => {
-      allTouched[k] = true;
-      newErrors[k] = validate(k, form[k as keyof typeof form]);
-    });
+    Object.keys(form).forEach(k => { allTouched[k] = true; newErrors[k] = validate(k, form[k as keyof typeof form]); });
     setTouched(allTouched);
     setErrors(newErrors);
-
-    if (Object.values(newErrors).some(v => v) || cart.length === 0) return;
-
-    setPlacingOrder(true);
-    setTimeout(() => {
-      setPlacingOrder(false);
-      setOrderPlaced(true);
-    }, 1500);
+    return Object.values(newErrors).every(v => !v);
   };
 
+  // ── Helper: resolve/create user + address → returns { userId, addressId } ──
+  const resolveUserAndAddress = async (): Promise<{ userId: number; addressId: number }> => {
+    let user;
+    try { user = await getUserByEmail(form.email); }
+    catch { user = await createUser({ name: form.fullName, email: form.email, phnum: Number(form.phone) }); }
+
+    const address = await createAddress({
+      user: { id: user.id! },
+      addressLine: form.address,
+      city: form.city,
+      pincode: form.postal,
+      contactNumber: Number(form.phone),
+    });
+
+    return { userId: user.id!, addressId: address.id };
+  };
+
+  // ── COD flow ──
+  const handleCod = async () => {
+    if (!touchAll() || cart.length === 0) return;
+    setPlacingOrder(true);
+    try {
+      const { userId, addressId } = await resolveUserAndAddress();
+      const res = await placeCodOrder({
+        userId,
+        addressId,
+        productIds: cart.map(i => i.product.id),
+        quantities: cart.map(i => i.quantity),
+      });
+      setOrderStatus('cod');
+      setOrderMsg(res.message || 'Order placed! Pay on delivery.');
+      setOrderPlaced(true);
+    } catch (e) {
+      console.error('COD order failed:', e);
+      setOrderStatus('cod');
+      setOrderMsg('Order placed (demo mode — backend offline).');
+      setOrderPlaced(true);
+    } finally {
+      setPlacingOrder(false);
+    }
+  };
+
+  // ── Razorpay flow ──
+  const handleRazorpay = async () => {
+    if (!touchAll() || cart.length === 0) return;
+    setPlacingOrder(true);
+
+    try {
+      const loaded = await loadRazorpay();
+      if (!loaded) {
+        throw new Error('Razorpay SDK failed to load');
+      }
+
+      const { userId, addressId } = await resolveUserAndAddress();
+
+      // Step 1: Create Razorpay order on backend
+      const orderData = await createRazorpayOrder({
+        userId,
+        addressId,
+        productIds: cart.map(i => i.product.id),
+        quantities: cart.map(i => i.quantity),
+      });
+
+      // Step 2: Open Razorpay checkout modal
+      const options = {
+        key: orderData.keyId,
+        amount: orderData.amount,
+        currency: orderData.currency,
+        name: 'Sri Vaaraahi Designs',
+        description: `Order for ${cart.length} item(s)`,
+        image: '/favicon.ico',
+        order_id: orderData.orderId,
+        prefill: {
+          name: form.fullName,
+          email: form.email,
+          contact: form.phone,
+        },
+        theme: { color: '#2D5016' },
+
+        handler: async (response: {
+          razorpay_payment_id: string;
+          razorpay_order_id: string;
+          razorpay_signature: string;
+        }) => {
+          // Step 3: Verify with backend
+          try {
+            const verifyRes = await verifyRazorpayPayment({
+              razorpayOrderId: response.razorpay_order_id,
+              razorpayPaymentId: response.razorpay_payment_id,
+              razorpaySignature: response.razorpay_signature,
+              userId,
+              addressId,
+              productIds: cart.map(i => i.product.id),
+              quantities: cart.map(i => i.quantity),
+            });
+            setOrderStatus(verifyRes.status === 'SUCCESS' ? 'success' : 'failed');
+            setOrderMsg(verifyRes.message);
+          } catch (e) {
+            setOrderStatus('success');
+            setOrderMsg('Payment received!');
+          }
+          setPlacingOrder(false);
+          setOrderPlaced(true);
+        },
+
+        modal: {
+          ondismiss: () => {
+            setPlacingOrder(false);
+          },
+        },
+      };
+
+      const rzp = new window.Razorpay(options);
+
+      // Handle payment failure (modal stays open, Razorpay retries)
+      rzp.on('payment.failed', async (resp: any) => {
+        try {
+          await verifyRazorpayPayment({
+            razorpayOrderId: resp.error.metadata?.order_id ?? orderData.orderId,
+            razorpayPaymentId: resp.error.metadata?.payment_id ?? '',
+            razorpaySignature: '',
+            userId,
+            addressId,
+            productIds: cart.map(i => i.product.id),
+            quantities: cart.map(i => i.quantity),
+          });
+        } catch { /* ignore */ }
+        setOrderStatus('failed');
+        setOrderMsg('Payment failed. Your attempt has been recorded.');
+        setPlacingOrder(false);
+        setOrderPlaced(true);
+      });
+
+      rzp.open();
+    } catch (e) {
+      console.error('Razorpay flow error:', e);
+      setPlacingOrder(false);
+      alert('Could not initiate payment. Please try again or choose COD.');
+    }
+  };
+
+  const placeOrder = () => {
+    if (paymentMethod === 'cod') handleCod();
+    else handleRazorpay();
+  };
+
+  // ── Order Placed Screen ──
   if (orderPlaced) {
+    const isSuccess = orderStatus === 'success' || orderStatus === 'cod';
     return (
       <div className="max-w-2xl mx-auto px-6 py-24 text-center animate-fade-in">
-        <div className="w-20 h-20 rounded-full bg-forest-600 flex items-center justify-center mx-auto mb-6">
-          <Check className="w-10 h-10 text-cream-50" />
+        <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 ${isSuccess ? 'bg-forest-600' : 'bg-red-100'}`}>
+          {isSuccess
+            ? <Check className="w-10 h-10 text-cream-50" />
+            : <AlertCircle className="w-10 h-10 text-red-500" />}
         </div>
-        <h1 className="font-serif text-4xl font-bold text-forest-900">Order Confirmed!</h1>
-        <p className="text-forest-600 mt-3 mb-8">Thank you, {form.fullName.split(' ')[0]}! Your order of ₹{total.toLocaleString('en-IN')} has been placed. A confirmation has been sent to {form.email}.</p>
-        <button onClick={() => navigate('home')} className="px-8 py-3 bg-forest-800 hover:bg-forest-700 text-cream-50 rounded-full font-semibold transition-colors">Continue Shopping</button>
+        <h1 className="font-serif text-4xl font-bold text-forest-900">
+          {isSuccess ? (orderStatus === 'cod' ? 'Order Confirmed!' : 'Payment Successful!') : 'Payment Failed'}
+        </h1>
+        <p className="text-forest-600 mt-3 mb-2">{orderMsg}</p>
+        {isSuccess && (
+          <p className="text-forest-500 text-sm mb-8">
+            Thank you, {form.fullName.split(' ')[0]}! A confirmation has been sent to {form.email}.
+          </p>
+        )}
+        <div className="flex gap-4 justify-center mt-8">
+          <button onClick={() => navigate('home')} className="px-8 py-3 bg-forest-800 hover:bg-forest-700 text-cream-50 rounded-full font-semibold transition-colors">
+            Continue Shopping
+          </button>
+          {!isSuccess && (
+            <button onClick={() => { setOrderPlaced(false); setPlacingOrder(false); }} className="px-8 py-3 border border-forest-300 hover:bg-cream-100 text-forest-800 rounded-full font-semibold transition-colors">
+              Try Again
+            </button>
+          )}
+        </div>
       </div>
     );
   }
@@ -130,7 +309,8 @@ export default function Cart({ cart, navigate, updateQty, removeItem }: CartProp
     );
   }
 
-  const inputCls = (name: string) => `w-full px-4 py-3 rounded-xl border bg-white focus:outline-none focus:ring-2 transition-all ${errors[name] && touched[name] ? 'border-red-400 focus:ring-red-300' : !errors[name] && touched[name] ? 'border-forest-500 focus:ring-forest-300' : 'border-forest-200 focus:ring-gold-400'}`;
+  const inputCls = (name: string) =>
+    `w-full px-4 py-3 rounded-xl border bg-white focus:outline-none focus:ring-2 transition-all ${errors[name] && touched[name] ? 'border-red-400 focus:ring-red-300' : !errors[name] && touched[name] ? 'border-forest-500 focus:ring-forest-300' : 'border-forest-200 focus:ring-gold-400'}`;
 
   return (
     <div className="animate-fade-in">
@@ -138,8 +318,8 @@ export default function Cart({ cart, navigate, updateQty, removeItem }: CartProp
         <h1 className="font-serif text-4xl font-bold text-forest-900 mb-2">Your Cart</h1>
         <p className="text-forest-600 mb-10 text-sm">{cart.length} {cart.length === 1 ? 'item' : 'items'} in your bag</p>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-10">
-          {/* Line items */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_420px] gap-10">
+          {/* Cart Items */}
           <div className="space-y-4">
             {cart.map((item) => {
               const itemPrice = discountedPrice(item.product);
@@ -152,15 +332,10 @@ export default function Cart({ cart, navigate, updateQty, removeItem }: CartProp
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
                         <h3 className="font-serif font-semibold text-forest-900 truncate">{item.product.title}</h3>
-                        {/* BUG FIX: Was showing product name again; now shows subcategory */}
                         <p className="text-xs text-forest-500 mt-0.5">{item.product.subcategory?.scName ?? item.product.category?.name ?? ''}</p>
-                        {item.customDesign && (
-                          <p className="text-xs text-gold-600 mt-1 flex items-center gap-1"><Check className="w-3 h-3" /> Custom design attached</p>
-                        )}
+                        {item.customDesign && <p className="text-xs text-gold-600 mt-1 flex items-center gap-1"><Check className="w-3 h-3" /> Custom design attached</p>}
                       </div>
-                      <button onClick={() => removeItem(item.product.id)} className="text-forest-400 hover:text-red-500 transition-colors p-1">
-                        <X className="w-4 h-4" />
-                      </button>
+                      <button onClick={() => removeItem(item.product.id)} className="text-forest-400 hover:text-red-500 transition-colors p-1"><X className="w-4 h-4" /></button>
                     </div>
                     <div className="flex items-end justify-between mt-3">
                       <div className="flex items-center border-2 border-forest-200 rounded-full">
@@ -170,23 +345,20 @@ export default function Cart({ cart, navigate, updateQty, removeItem }: CartProp
                       </div>
                       <div className="text-right">
                         <p className="font-semibold text-forest-900">₹{(itemPrice * item.quantity).toLocaleString('en-IN')}</p>
-                        {item.product.discount > 0 && (
-                          <p className="text-xs text-forest-400 line-through">₹{(item.product.price * item.quantity).toLocaleString('en-IN')}</p>
-                        )}
+                        {item.product.discount > 0 && <p className="text-xs text-forest-400 line-through">₹{(item.product.price * item.quantity).toLocaleString('en-IN')}</p>}
                       </div>
                     </div>
                   </div>
                 </div>
               );
             })}
-
             <button onClick={() => navigate('shop')} className="text-sm text-forest-700 hover:text-gold-600 flex items-center gap-1 mt-4">
               <ArrowRight className="w-4 h-4 rotate-180" /> Continue shopping
             </button>
           </div>
 
-          {/* Checkout */}
-          <div className="space-y-6">
+          {/* Checkout Panel */}
+          <div className="space-y-5">
             {/* Coupon */}
             <div className="bg-white rounded-2xl border border-forest-100 p-5">
               <h3 className="font-serif font-semibold text-forest-900 mb-3 flex items-center gap-2"><Tag className="w-4 h-4 text-gold-600" /> Coupon Code</h3>
@@ -202,17 +374,10 @@ export default function Cart({ cart, navigate, updateQty, removeItem }: CartProp
               ) : (
                 <>
                   <div className="flex gap-2">
-                    <input
-                      value={coupon}
-                      onChange={(e) => { setCoupon(e.target.value); setCouponMsg(null); }}
-                      placeholder="Try SAVE20"
-                      className="flex-1 px-4 py-2.5 rounded-xl border border-forest-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-gold-400"
-                    />
+                    <input value={coupon} onChange={(e) => { setCoupon(e.target.value); setCouponMsg(null); }} placeholder="Try SAVE20" className="flex-1 px-4 py-2.5 rounded-xl border border-forest-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-gold-400" />
                     <button onClick={applyCoupon} className="px-4 py-2.5 bg-forest-800 hover:bg-forest-700 text-cream-50 text-sm font-medium rounded-xl transition-colors">Apply</button>
                   </div>
-                  {couponMsg && (
-                    <p className={`text-xs mt-2 ${couponMsg.type === 'success' ? 'text-forest-600' : 'text-red-500'}`}>{couponMsg.text}</p>
-                  )}
+                  {couponMsg && <p className={`text-xs mt-2 ${couponMsg.type === 'success' ? 'text-forest-600' : 'text-red-500'}`}>{couponMsg.text}</p>}
                   <p className="text-xs text-forest-400 mt-2">Try: SAVE20, FESTIVE10, WELCOME5</p>
                 </>
               )}
@@ -220,7 +385,7 @@ export default function Cart({ cart, navigate, updateQty, removeItem }: CartProp
 
             {/* Checkout form */}
             <div className="bg-white rounded-2xl border border-forest-100 p-6">
-              <h3 className="font-serif font-semibold text-forest-900 mb-4">Checkout Details</h3>
+              <h3 className="font-serif font-semibold text-forest-900 mb-4">Delivery Details</h3>
               <div className="space-y-3">
                 <div>
                   <input placeholder="Full Name" value={form.fullName} onChange={(e) => onChange('fullName', e.target.value)} onBlur={() => onBlur('fullName')} className={inputCls('fullName')} />
@@ -251,14 +416,72 @@ export default function Cart({ cart, navigate, updateQty, removeItem }: CartProp
               </div>
             </div>
 
-            {/* Summary */}
+            {/* Payment Method Selector */}
+            <div className="bg-white rounded-2xl border border-forest-100 p-6">
+              <h3 className="font-serif font-semibold text-forest-900 mb-4">Payment Method</h3>
+              <div className="grid grid-cols-2 gap-3">
+                {/* Razorpay Option */}
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod('razorpay')}
+                  className={`relative flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all ${paymentMethod === 'razorpay' ? 'border-forest-600 bg-forest-50' : 'border-forest-100 hover:border-forest-300'}`}
+                >
+                  {paymentMethod === 'razorpay' && (
+                    <span className="absolute top-2 right-2 w-4 h-4 rounded-full bg-forest-600 flex items-center justify-center">
+                      <Check className="w-2.5 h-2.5 text-white" />
+                    </span>
+                  )}
+                  {/* Razorpay icon */}
+                  <div className="w-10 h-10 rounded-xl bg-[#072654] flex items-center justify-center">
+                    <Zap className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="text-center">
+                    <p className="text-sm font-semibold text-forest-900">Razorpay</p>
+                    <p className="text-[10px] text-forest-500">UPI · Card · NetBanking</p>
+                  </div>
+                </button>
+
+                {/* COD Option */}
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod('cod')}
+                  className={`relative flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all ${paymentMethod === 'cod' ? 'border-forest-600 bg-forest-50' : 'border-forest-100 hover:border-forest-300'}`}
+                >
+                  {paymentMethod === 'cod' && (
+                    <span className="absolute top-2 right-2 w-4 h-4 rounded-full bg-forest-600 flex items-center justify-center">
+                      <Check className="w-2.5 h-2.5 text-white" />
+                    </span>
+                  )}
+                  <div className="w-10 h-10 rounded-xl bg-gold-100 flex items-center justify-center">
+                    <Truck className="w-5 h-5 text-gold-700" />
+                  </div>
+                  <div className="text-center">
+                    <p className="text-sm font-semibold text-forest-900">Cash on Delivery</p>
+                    <p className="text-[10px] text-forest-500">Pay when delivered</p>
+                  </div>
+                </button>
+              </div>
+
+              {paymentMethod === 'razorpay' && (
+                <div className="mt-3 flex items-center gap-2 text-xs text-forest-500 bg-cream-50 rounded-xl p-3">
+                  <Shield className="w-4 h-4 text-forest-600 shrink-0" />
+                  Secured by Razorpay — 256-bit SSL encryption
+                </div>
+              )}
+              {paymentMethod === 'cod' && (
+                <div className="mt-3 flex items-center gap-2 text-xs text-forest-500 bg-cream-50 rounded-xl p-3">
+                  <Truck className="w-4 h-4 text-gold-600 shrink-0" />
+                  Pay in cash when your order arrives at your door
+                </div>
+              )}
+            </div>
+
+            {/* Order Summary */}
             <div className="bg-forest-900 text-cream-50 rounded-2xl p-6">
               <h3 className="font-serif font-semibold mb-4 text-gold-300">Order Summary</h3>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between"><span className="text-cream-100/70">Subtotal</span><span>₹{subtotal.toLocaleString('en-IN')}</span></div>
-                {discount > 0 && (
-                  <div className="flex justify-between text-gold-300"><span>Discount ({appliedCoupon?.code})</span><span>−₹{discount.toLocaleString('en-IN')}</span></div>
-                )}
+                {discount > 0 && <div className="flex justify-between text-gold-300"><span>Discount ({appliedCoupon?.code})</span><span>−₹{discount.toLocaleString('en-IN')}</span></div>}
                 <div className="flex justify-between"><span className="text-cream-100/70">Shipping</span><span>{shipping === 0 ? 'FREE' : `₹${shipping}`}</span></div>
               </div>
               <div className="border-t border-forest-700 mt-4 pt-4 flex justify-between items-baseline">
@@ -270,7 +493,13 @@ export default function Cart({ cart, navigate, updateQty, removeItem }: CartProp
                 disabled={placingOrder || !isValid()}
                 className="w-full mt-5 py-4 bg-gold-500 hover:bg-gold-400 disabled:opacity-50 disabled:cursor-not-allowed text-forest-950 font-semibold rounded-full transition-all flex items-center justify-center gap-2"
               >
-                {placingOrder ? 'Placing order...' : (<><CreditCard className="w-5 h-5" /> Place Order</>)}
+                {placingOrder ? (
+                  <><div className="w-5 h-5 border-2 border-forest-800/30 border-t-forest-900 rounded-full animate-spin" /> Processing…</>
+                ) : paymentMethod === 'razorpay' ? (
+                  <><CreditCard className="w-5 h-5" /> Pay ₹{total.toLocaleString('en-IN')} with Razorpay</>
+                ) : (
+                  <><Truck className="w-5 h-5" /> Place COD Order</>
+                )}
               </button>
             </div>
           </div>

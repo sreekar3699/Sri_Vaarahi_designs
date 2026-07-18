@@ -59,6 +59,14 @@ export async function createProduct(product: Omit<Product, 'id'>): Promise<Produ
   });
 }
 
+/** Update a product */
+export async function updateProduct(id: number, product: Partial<Omit<Product, 'id'>>): Promise<Product> {
+  return fetchJSON<Product>(`${API_BASE}/products/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(product),
+  });
+}
+
 /** Delete a product */
 export async function deleteProduct(id: number): Promise<void> {
   return fetchJSON<void>(`${API_BASE}/products/${id}`, { method: 'DELETE' });
@@ -81,6 +89,19 @@ export async function createCategory(data: { name: string }): Promise<Category> 
   });
 }
 
+/** Update a category */
+export async function updateCategory(id: number, data: { name: string }): Promise<Category> {
+  return fetchJSON<Category>(`${API_BASE}/categories/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+}
+
+/** Delete a category */
+export async function deleteCategory(id: number): Promise<void> {
+  return fetchJSON<void>(`${API_BASE}/categories/${id}`, { method: 'DELETE' });
+}
+
 // ═══════════════════════════════════════
 // Subcategories
 // ═══════════════════════════════════════
@@ -101,6 +122,19 @@ export async function createSubcategory(data: { scName: string; category: { id: 
     method: 'POST',
     body: JSON.stringify(data),
   });
+}
+
+/** Update a subcategory */
+export async function updateSubcategory(id: number, data: { scName: string; category: { id: number } }): Promise<Subcategory> {
+  return fetchJSON<Subcategory>(`${API_BASE}/subcategories/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+}
+
+/** Delete a subcategory */
+export async function deleteSubcategory(id: number): Promise<void> {
+  return fetchJSON<void>(`${API_BASE}/subcategories/${id}`, { method: 'DELETE' });
 }
 
 // ═══════════════════════════════════════
@@ -146,6 +180,30 @@ export async function createOrder(data: OrderPayload): Promise<unknown> {
   });
 }
 
+/** Fetch all orders */
+export async function fetchOrders(): Promise<any[]> {
+  return fetchJSON<any[]>(`${API_BASE}/orders`);
+}
+
+// ═══════════════════════════════════════
+// Addresses
+// ═══════════════════════════════════════
+
+interface AddressPayload {
+  user: { id: number };
+  addressLine: string;
+  city: string;
+  pincode: string;
+  contactNumber: number;
+}
+
+export async function createAddress(data: AddressPayload): Promise<{ id: number }> {
+  return fetchJSON<{ id: number }>(`${API_BASE}/addresses`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
 // ═══════════════════════════════════════
 // Reviews
 // ═══════════════════════════════════════
@@ -160,6 +218,65 @@ interface ReviewPayload {
 /** Create a new review */
 export async function createReview(data: ReviewPayload): Promise<unknown> {
   return fetchJSON(`${API_BASE}/reviews`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+// ═══════════════════════════════════════
+// Razorpay
+// ═══════════════════════════════════════
+
+export interface RazorpayOrderResponse {
+  orderId: string;
+  amount: number;
+  currency: string;
+  keyId: string;
+}
+
+export interface RazorpayCreateRequest {
+  userId: number;
+  addressId: number;
+  productIds: number[];
+  quantities: number[];
+}
+
+/** Create a Razorpay order on the backend */
+export async function createRazorpayOrder(data: RazorpayCreateRequest): Promise<RazorpayOrderResponse> {
+  return fetchJSON<RazorpayOrderResponse>(`${API_BASE}/razorpay/create-order`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export interface RazorpayVerifyRequest {
+  razorpayOrderId: string;
+  razorpayPaymentId: string;
+  razorpaySignature: string;
+  userId: number;
+  addressId: number;
+  productIds: number[];
+  quantities: number[];
+}
+
+/** Verify Razorpay payment signature + persist orders */
+export async function verifyRazorpayPayment(data: RazorpayVerifyRequest): Promise<{ status: string; message: string }> {
+  return fetchJSON<{ status: string; message: string }>(`${API_BASE}/razorpay/verify`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export interface CodOrderRequest {
+  userId: number;
+  addressId: number;
+  productIds: number[];
+  quantities: number[];
+}
+
+/** Place a Cash-on-Delivery order */
+export async function placeCodOrder(data: CodOrderRequest): Promise<{ status: string; message: string }> {
+  return fetchJSON<{ status: string; message: string }>(`${API_BASE}/razorpay/cod`, {
     method: 'POST',
     body: JSON.stringify(data),
   });

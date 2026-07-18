@@ -31,7 +31,11 @@ public class Order {
     private Address address;
 
     @Column(name = "payment_method")
-    private String paymentMethod;
+    private String paymentMethod; // "RAZORPAY" or "COD"
+
+    /** PENDING / CONFIRMED / CANCELLED */
+    @Column(name = "status")
+    private String status;
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "payment_id")
@@ -39,4 +43,7 @@ public class Order {
 
     @Column(name = "tracking_id")
     private String trackingId;
+
+    @Column(name = "quantity")
+    private Integer quantity;
 }
