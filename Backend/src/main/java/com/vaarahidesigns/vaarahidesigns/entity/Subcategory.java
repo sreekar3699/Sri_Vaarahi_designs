@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import java.util.List;
 import java.util.ArrayList;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "subcategories")
@@ -27,6 +28,7 @@ public class Subcategory {
     @Column(name = "sc_name")
     private String scName;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "subcategory", cascade = CascadeType.ALL)
     private List<Product> products = new ArrayList<>();
 }
