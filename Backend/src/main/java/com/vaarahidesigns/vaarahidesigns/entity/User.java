@@ -33,8 +33,8 @@ public class User {
 
     private String picture; // Profile picture URL from Google
 
-    @Column(nullable = false, columnDefinition = "VARCHAR(255) DEFAULT 'USER'")
-    private String role = "USER";
+    @Column(nullable = false, columnDefinition = "VARCHAR(20) DEFAULT 'USER'")
+    private String role = "USER"; // USER or ADMIN
 
     @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)

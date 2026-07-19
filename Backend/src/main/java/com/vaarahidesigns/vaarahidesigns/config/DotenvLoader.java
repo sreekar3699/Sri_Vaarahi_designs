@@ -37,6 +37,11 @@ public class DotenvLoader {
             if (razorpayKeySecret != null) {
                 System.setProperty("RAZORPAY_KEY_SECRET", razorpayKeySecret);
             }
+
+            String jwtSecret = dotenv.get("JWT_SECRET");
+            if (jwtSecret != null) {
+                System.setProperty("JWT_SECRET", jwtSecret);
+            }
         } catch (Exception e) {
             System.err.println("Could not load .env file: " + e.getMessage());
         }
