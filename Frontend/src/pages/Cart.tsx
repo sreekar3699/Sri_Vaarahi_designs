@@ -46,7 +46,7 @@ export default function Cart({ cart, navigate, updateQty, removeItem, isAuthenti
   const [orderStatus, setOrderStatus] = useState<'success' | 'failed' | 'cod'>('success');
   const [orderMsg, setOrderMsg] = useState('');
 
-  const { guardedAction, LoginModal } = useLoginGuard(navigate as (page: Page) => void, isAuthenticated);
+  const { guardedAction, LoginModal } = useLoginGuard(navigate as (page: Page) => void, isAuthenticated, true);
 
   const subtotal = useMemo(() => cart.reduce((s, i) => s + discountedPrice(i.product) * i.quantity, 0), [cart]);
   const discount = appliedCoupon ? Math.round(subtotal * appliedCoupon.pct / 100) : 0;
@@ -265,10 +265,6 @@ export default function Cart({ cart, navigate, updateQty, removeItem, isAuthenti
   const handleRazorpay = () => guardedAction(handleRazorpayInner);
 
   const placeOrder = () => {
-    if (!isAuthenticated) {
-      setShowLoginPrompt(true);
-      return;
-    }
     if (paymentMethod === 'cod') handleCod();
     else handleRazorpay();
   };

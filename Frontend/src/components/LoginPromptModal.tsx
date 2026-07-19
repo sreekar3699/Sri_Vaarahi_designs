@@ -6,6 +6,7 @@ interface LoginPromptModalProps {
   countdown: number;
   onCancel: () => void;
   onProceed: () => void;
+  hideCancel?: boolean;
 }
 
 const TOTAL = 5;
@@ -15,12 +16,13 @@ export default function LoginPromptModal({
   countdown,
   onCancel,
   onProceed,
+  hideCancel = false,
 }: LoginPromptModalProps) {
   const overlayRef = useRef<HTMLDivElement>(null);
 
-  // Close on backdrop click
+  // Close on backdrop click (only if cancel is not hidden)
   const handleBackdrop = (e: React.MouseEvent) => {
-    if (e.target === overlayRef.current) onCancel();
+    if (!hideCancel && e.target === overlayRef.current) onCancel();
   };
 
   // Lock body scroll while open
@@ -54,13 +56,15 @@ export default function LoginPromptModal({
         }}
       >
         {/* Close button */}
-        <button
-          onClick={onCancel}
-          className="absolute top-4 right-4 p-1.5 rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-colors"
-          aria-label="Close"
-        >
-          <X size={18} />
-        </button>
+        {!hideCancel && (
+          <button
+            onClick={onCancel}
+            className="absolute top-4 right-4 p-1.5 rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-colors"
+            aria-label="Close"
+          >
+            <X size={18} />
+          </button>
+        )}
 
         <div className="p-8 flex flex-col items-center text-center gap-5">
           {/* Icon */}
@@ -113,12 +117,14 @@ export default function LoginPromptModal({
 
           {/* Buttons */}
           <div className="flex gap-3 w-full">
-            <button
-              onClick={onCancel}
-              className="flex-1 py-2.5 rounded-xl border border-white/20 text-white/80 text-sm font-medium hover:bg-white/10 transition-colors"
-            >
-              Cancel
-            </button>
+            {!hideCancel && (
+              <button
+                onClick={onCancel}
+                className="flex-1 py-2.5 rounded-xl border border-white/20 text-white/80 text-sm font-medium hover:bg-white/10 transition-colors"
+              >
+                Cancel
+              </button>
+            )}
             <button
               onClick={onProceed}
               className="flex-1 py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all hover:scale-105 active:scale-100"

@@ -20,6 +20,7 @@ const COUNTDOWN_START = 5;
 export function useLoginGuard(
   navigate: (page: Page) => void,
   isAuthenticated: boolean,
+  hideCancel: boolean = false,
 ) {
   const [modalOpen, setModalOpen] = useState(false);
   const [countdown, setCountdown] = useState(COUNTDOWN_START);
@@ -89,6 +90,7 @@ export function useLoginGuard(
       countdown={countdown}
       onCancel={handleCancel}
       onProceed={handleProceed}
+      hideCancel={hideCancel}
     />
   );
 
