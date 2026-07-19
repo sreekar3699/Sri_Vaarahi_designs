@@ -21,3 +21,8 @@ spring:
 razorpay:
   key-id: test-key-id
   key-secret: test-key-secret
+
+jwt:
+  secret: dGVzdC1zZWNyZXQtZm9yLXVuaXQtdGVzdHMtbXVzdC1iZS0yNTYtYml0LWxvbmc=
+  expiration-ms: 900000
+  refresh-expiration-ms: 604800000
