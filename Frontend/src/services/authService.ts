@@ -9,6 +9,7 @@ export interface AuthUser {
   email: string;
   picture: string;
   phone?: string;
+  role: 'USER' | 'ADMIN';
 }
 
 /**

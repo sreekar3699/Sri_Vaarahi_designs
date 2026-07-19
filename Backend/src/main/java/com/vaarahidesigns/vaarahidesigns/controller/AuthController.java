@@ -52,6 +52,7 @@ public class AuthController {
         if (user.getPhnum() != null) {
             responseBuilder.put("phone", user.getPhnum().toString());
         }
+        responseBuilder.put("role", user.getRole());
 
         return ResponseEntity.ok(responseBuilder);
     }

@@ -2,7 +2,7 @@
 // SCHEMA: Updated all field references to match backend entity names.
 
 import { useMemo, useState } from 'react';
-import { ChevronRight, Minus, Plus, ShoppingCart, Truck, ShieldCheck, RefreshCw, Check, Heart, Share2 } from 'lucide-react';
+import { ChevronRight, Minus, Plus, ShoppingCart, Truck, ShieldCheck, RefreshCw, Check, Heart, Share2, Zap } from 'lucide-react';
 import { Category, Product, Subcategory, Page, CartItem, discountedPrice } from '../types';
 import { getDirectDriveLink } from '../utils/imageUtils';
 import DesignUpload from '../components/DesignUpload';
@@ -53,6 +53,11 @@ export default function ProductDetail({ product, categories, subcategories, prod
     addToCart({ product, quantity: qty, customDesign });
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
+  };
+
+  const handleBuyNow = () => {
+    addToCart({ product, quantity: qty, customDesign });
+    navigate('cart');
   };
 
   const whatsappText = encodeURIComponent(
@@ -162,9 +167,15 @@ export default function ProductDetail({ product, categories, subcategories, prod
           <div className="mt-8 flex flex-col sm:flex-row gap-3">
             <button
               onClick={handleAddToCart}
-              className={`flex-1 py-4 rounded-full font-semibold transition-all flex items-center justify-center gap-2 ${added ? 'bg-forest-600 text-cream-50' : 'bg-forest-800 hover:bg-forest-700 text-cream-50 hover:scale-[1.02]'}`}
+              className={`flex-1 py-4 rounded-full font-semibold transition-all flex items-center justify-center gap-2 ${added ? 'bg-forest-600 text-cream-50' : 'border-2 border-forest-800 text-forest-800 hover:bg-forest-50 hover:scale-[1.02]'}`}
             >
-              {added ? (<><Check className="w-5 h-5" /> Added to Cart!</>) : (<><ShoppingCart className="w-5 h-5" /> Add to Cart</>)}
+              {added ? (<><Check className="w-5 h-5" /> Added!</>) : (<><ShoppingCart className="w-5 h-5" /> Add to Cart</>)}
+            </button>
+            <button
+              onClick={handleBuyNow}
+              className="flex-1 py-4 rounded-full font-semibold bg-gold-500 hover:bg-gold-400 text-forest-950 transition-all flex items-center justify-center gap-2 hover:scale-[1.02]"
+            >
+              <Zap className="w-5 h-5" /> Buy Now
             </button>
             <a
               href={whatsappUrl}
