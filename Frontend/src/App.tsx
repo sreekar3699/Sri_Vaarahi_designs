@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { Page, Category, Subcategory, Product, CartItem } from './types';
 import { fallbackCategories, fallbackSubcategories, fallbackProducts } from './data/mockData';
-import { getCurrentUser, AuthUser } from './services/authService';
+import { getCurrentUser, storeTokens, clearTokens, AuthUser } from './services/authService';
 import {
   fetchCategories,
   fetchSubcategories,
@@ -53,30 +53,36 @@ export default function App() {
       setIsLoading(true);
       setError(null);
 
-      // 1. Always try to restore the backend session (persists across page refreshes)
-      const sessionUser = await getCurrentUser();
-      if (sessionUser) {
-        setAuthUser(sessionUser);
-        setIsAuthenticated(true);
-      }
-
-      // 2. Check if this is a fresh OAuth2 redirect from Google
+      // 1. Check for OAuth2 redirect with JWT tokens
       const params = new URLSearchParams(window.location.search);
-      if (params.get('oauth2') === 'success') {
-        // Fetch user in case session check above didn't catch it yet
-        const oauthUser = sessionUser || await getCurrentUser();
-        if (oauthUser) {
-          setAuthUser(oauthUser);
-          setIsAuthenticated(true);
-          // If no phone number, prompt for registration
-          if (!oauthUser.phone) {
-            setCurrentPage('phone-registration');
-          }
-        }
+      const token        = params.get('token');
+      const refreshToken = params.get('refreshToken');
+
+      if (params.get('oauth2') === 'success' && token && refreshToken) {
+        storeTokens(token, refreshToken);
         window.history.replaceState({}, document.title, '/');
       }
 
-      // 3. Fetch product/category data
+      // 2. Decode user from stored access token (no network call)
+      const sessionUser = getCurrentUser();
+      if (sessionUser) {
+        setAuthUser(sessionUser);
+        setIsAuthenticated(true);
+        // Prompt phone registration if missing or empty
+        if (!sessionUser.phone?.trim()) {
+          setCurrentPage('phone-registration');
+        }
+      }
+
+      // 3. Listen for session-expired events fired by apiFetch
+      const onExpired = () => {
+        setIsAuthenticated(false);
+        setAuthUser(null);
+        setCurrentPage('auth');
+      };
+      window.addEventListener('auth:sessionExpired', onExpired);
+
+      // 4. Fetch product/category data
       try {
         const [cats, subs, prods] = await Promise.all([
           fetchCategories(),
@@ -95,12 +101,20 @@ export default function App() {
       } finally {
         setIsLoading(false);
       }
+
+      return () => window.removeEventListener('auth:sessionExpired', onExpired);
     }
     init();
   }, []);
 
-  // ─── Navigation ───
+  // ─── Navigation (with admin route guard) ───
   const navigate = useCallback((page: Page, opts?: { categoryId?: number; subcategoryId?: number; productId?: number }) => {
+    // Block direct navigation to admin for non-admin users
+    if (page === 'admin' && authUser?.role !== 'ADMIN') {
+      setCurrentPage('home');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
     setCurrentPage(page);
     if (opts) {
       if (opts.categoryId !== undefined) setSelectedCategoryId(opts.categoryId);
@@ -108,7 +122,7 @@ export default function App() {
       if (opts.productId !== undefined) setSelectedProductId(opts.productId);
     }
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, []);
+  }, [authUser]);
 
   // ─── Cart operations ───
   const addToCart = useCallback((item: CartItem) => {
@@ -342,6 +356,7 @@ export default function App() {
             navigate={navigate}
             updateQty={updateQty}
             removeItem={removeItem}
+            isAuthenticated={isAuthenticated}
           />
         )}
 
@@ -353,7 +368,7 @@ export default function App() {
           <Profile
             navigate={navigate}
             authUser={authUser}
-            onLogout={() => { setIsAuthenticated(false); setAuthUser(null); }}
+            onLogout={() => { setIsAuthenticated(false); setAuthUser(null); clearTokens(); }}
           />
         )}
 
@@ -365,7 +380,8 @@ export default function App() {
           />
         )}
 
-        {currentPage === 'admin' && (
+        {/* Admin page — only renders for ADMIN role */}
+        {currentPage === 'admin' && authUser?.role === 'ADMIN' && (
           <Admin
             categories={categories}
             subcategories={subcategories}

@@ -12,6 +12,7 @@ import {
 } from '../services/api';
 import RollingNumber from '../components/RollingNumber';
 import { getDirectDriveLink } from '../utils/imageUtils';
+import { useLoginGuard } from '../hooks/useLoginGuard';
 
 // Extend window for Razorpay global
 declare global {
@@ -25,13 +26,14 @@ interface CartProps {
   navigate: (page: Page, opts?: { categoryId?: number; subcategoryId?: number; productId?: number }) => void;
   updateQty: (productId: number, qty: number) => void;
   removeItem: (productId: number) => void;
+  isAuthenticated: boolean;
 }
 
 interface FormErrors { [k: string]: string }
 
 type PaymentMethod = 'razorpay' | 'cod';
 
-export default function Cart({ cart, navigate, updateQty, removeItem }: CartProps) {
+export default function Cart({ cart, navigate, updateQty, removeItem, isAuthenticated }: CartProps) {
   const [coupon, setCoupon] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; pct: number } | null>(null);
   const [couponMsg, setCouponMsg] = useState<{ type: 'error' | 'success'; text: string } | null>(null);
@@ -43,6 +45,8 @@ export default function Cart({ cart, navigate, updateQty, removeItem }: CartProp
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [orderStatus, setOrderStatus] = useState<'success' | 'failed' | 'cod'>('success');
   const [orderMsg, setOrderMsg] = useState('');
+
+  const { guardedAction, LoginModal } = useLoginGuard(navigate as (page: Page) => void, isAuthenticated);
 
   const subtotal = useMemo(() => cart.reduce((s, i) => s + discountedPrice(i.product) * i.quantity, 0), [cart]);
   const discount = appliedCoupon ? Math.round(subtotal * appliedCoupon.pct / 100) : 0;
@@ -135,7 +139,7 @@ export default function Cart({ cart, navigate, updateQty, removeItem }: CartProp
   };
 
   // ── COD flow ──
-  const handleCod = async () => {
+  const handleCodInner = async () => {
     if (!touchAll() || cart.length === 0) return;
     setPlacingOrder(true);
     try {
@@ -158,9 +162,10 @@ export default function Cart({ cart, navigate, updateQty, removeItem }: CartProp
       setPlacingOrder(false);
     }
   };
+  const handleCod = () => guardedAction(handleCodInner);
 
   // ── Razorpay flow ──
-  const handleRazorpay = async () => {
+  const handleRazorpayInner = async () => {
     if (!touchAll() || cart.length === 0) return;
     setPlacingOrder(true);
 
@@ -257,6 +262,7 @@ export default function Cart({ cart, navigate, updateQty, removeItem }: CartProp
       alert('Could not initiate payment. Please try again or choose COD.');
     }
   };
+  const handleRazorpay = () => guardedAction(handleRazorpayInner);
 
   const placeOrder = () => {
     if (paymentMethod === 'cod') handleCod();
@@ -267,32 +273,35 @@ export default function Cart({ cart, navigate, updateQty, removeItem }: CartProp
   if (orderPlaced) {
     const isSuccess = orderStatus === 'success' || orderStatus === 'cod';
     return (
-      <div className="max-w-2xl mx-auto px-6 py-24 text-center animate-fade-in">
-        <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 ${isSuccess ? 'bg-forest-600' : 'bg-red-100'}`}>
-          {isSuccess
-            ? <Check className="w-10 h-10 text-cream-50" />
-            : <AlertCircle className="w-10 h-10 text-red-500" />}
-        </div>
-        <h1 className="font-serif text-4xl font-bold text-forest-900">
-          {isSuccess ? (orderStatus === 'cod' ? 'Order Confirmed!' : 'Payment Successful!') : 'Payment Failed'}
-        </h1>
-        <p className="text-forest-600 mt-3 mb-2">{orderMsg}</p>
-        {isSuccess && (
-          <p className="text-forest-500 text-sm mb-8">
-            Thank you, {form.fullName.split(' ')[0]}! A confirmation has been sent to {form.email}.
-          </p>
-        )}
-        <div className="flex gap-4 justify-center mt-8">
-          <button onClick={() => navigate('home')} className="px-8 py-3 bg-forest-800 hover:bg-forest-700 text-cream-50 rounded-full font-semibold transition-colors">
-            Continue Shopping
-          </button>
-          {!isSuccess && (
-            <button onClick={() => { setOrderPlaced(false); setPlacingOrder(false); }} className="px-8 py-3 border border-forest-300 hover:bg-cream-100 text-forest-800 rounded-full font-semibold transition-colors">
-              Try Again
-            </button>
+      <>
+        {LoginModal}
+        <div className="max-w-2xl mx-auto px-6 py-24 text-center animate-fade-in">
+          <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 ${isSuccess ? 'bg-forest-600' : 'bg-red-100'}`}>
+            {isSuccess
+              ? <Check className="w-10 h-10 text-cream-50" />
+              : <AlertCircle className="w-10 h-10 text-red-500" />}
+          </div>
+          <h1 className="font-serif text-4xl font-bold text-forest-900">
+            {isSuccess ? (orderStatus === 'cod' ? 'Order Confirmed!' : 'Payment Successful!') : 'Payment Failed'}
+          </h1>
+          <p className="text-forest-600 mt-3 mb-2">{orderMsg}</p>
+          {isSuccess && (
+            <p className="text-forest-500 text-sm mb-8">
+              Thank you, {form.fullName.split(' ')[0]}! A confirmation has been sent to {form.email}.
+            </p>
           )}
+          <div className="flex gap-4 justify-center mt-8">
+            <button onClick={() => navigate('home')} className="px-8 py-3 bg-forest-800 hover:bg-forest-700 text-cream-50 rounded-full font-semibold transition-colors">
+              Continue Shopping
+            </button>
+            {!isSuccess && (
+              <button onClick={() => { setOrderPlaced(false); setPlacingOrder(false); }} className="px-8 py-3 border border-forest-300 hover:bg-cream-100 text-forest-800 rounded-full font-semibold transition-colors">
+                Try Again
+              </button>
+            )}
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 
@@ -313,7 +322,9 @@ export default function Cart({ cart, navigate, updateQty, removeItem }: CartProp
     `w-full px-4 py-3 rounded-xl border bg-white focus:outline-none focus:ring-2 transition-all ${errors[name] && touched[name] ? 'border-red-400 focus:ring-red-300' : !errors[name] && touched[name] ? 'border-forest-500 focus:ring-forest-300' : 'border-forest-200 focus:ring-gold-400'}`;
 
   return (
-    <div className="animate-fade-in">
+    <>
+      {LoginModal}
+      <div className="animate-fade-in">
       <div className="max-w-7xl mx-auto px-6 lg:px-8 py-10">
         <h1 className="font-serif text-4xl font-bold text-forest-900 mb-2">Your Cart</h1>
         <p className="text-forest-600 mb-10 text-sm">{cart.length} {cart.length === 1 ? 'item' : 'items'} in your bag</p>
@@ -505,6 +516,7 @@ export default function Cart({ cart, navigate, updateQty, removeItem }: CartProp
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 }

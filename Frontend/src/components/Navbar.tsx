@@ -146,7 +146,9 @@ export default function Navbar({ cartCount, navigate, categories, subcategories,
 
               <button onClick={() => navigate('shop')} className="text-sm font-medium text-forest-700 hover:text-gold-600 transition-colors">Best Sellers</button>
               <button onClick={() => navigate('shop')} className="text-sm font-medium text-forest-700 hover:text-gold-600 transition-colors">New Arrivals</button>
-              <button onClick={() => navigate('admin')} className="text-sm font-medium text-forest-700 hover:text-gold-600 transition-colors">Admin</button>
+              {authUser?.role === 'ADMIN' && (
+                <button onClick={() => navigate('admin')} className="text-sm font-medium text-forest-700 hover:text-gold-600 transition-colors">Admin</button>
+              )}
             </div>
 
             <div className="flex items-center gap-2 sm:gap-4">
@@ -213,7 +215,9 @@ export default function Navbar({ cartCount, navigate, categories, subcategories,
                 </div>
               ))}
             </div>
-            <button onClick={() => { navigate('admin'); setMobileOpen(false); }} className="block w-full text-left py-2 text-forest-800 font-medium">Admin</button>
+            {authUser?.role === 'ADMIN' && (
+              <button onClick={() => { navigate('admin'); setMobileOpen(false); }} className="block w-full text-left py-2 text-forest-800 font-medium">Admin</button>
+            )}
             <button
               onClick={() => { navigate(isAuthenticated ? 'profile' : 'auth'); setMobileOpen(false); }}
               className="flex items-center gap-2 w-full text-left py-2 text-forest-800 font-medium"
