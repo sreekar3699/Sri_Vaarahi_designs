@@ -18,10 +18,10 @@ import java.util.Optional;
 /**
  * Authentication endpoints consumed by the frontend.
  *
- *  GET  /api/auth/me           — return current user from JWT
- *  POST /api/auth/phone        — save phone number (JWT required)
- *  POST /api/auth/logout       — revoke refresh token in DB
- *  POST /api/auth/refresh      — exchange refresh token for new token pair
+ * GET /api/auth/me — return current user from JWT
+ * POST /api/auth/phone — save phone number (JWT required)
+ * POST /api/auth/logout — revoke refresh token in DB
+ * POST /api/auth/refresh — exchange refresh token for new token pair
  */
 @RestController
 @RequestMapping("/api/auth")
@@ -36,7 +36,8 @@ public class AuthController {
 
     /**
      * Returns the currently authenticated user's details.
-     * The JWT filter has already validated the token and populated the SecurityContext.
+     * The JWT filter has already validated the token and populated the
+     * SecurityContext.
      */
     @GetMapping("/me")
     public ResponseEntity<?> getCurrentUser(Authentication authentication) {
@@ -52,12 +53,13 @@ public class AuthController {
 
         User user = userOpt.get();
         var resp = new java.util.LinkedHashMap<String, Object>();
-        resp.put("id",      user.getId());
-        resp.put("name",    user.getName());
-        resp.put("email",   user.getEmail());
+        resp.put("id", user.getId());
+        resp.put("name", user.getName());
+        resp.put("email", user.getEmail());
         resp.put("picture", user.getPicture() != null ? user.getPicture() : "");
-        resp.put("role",    user.getRole());
-        if (user.getPhnum() != null) resp.put("phone", user.getPhnum().toString());
+        resp.put("role", user.getRole());
+        if (user.getPhnum() != null)
+            resp.put("phone", user.getPhnum().toString());
 
         return ResponseEntity.ok(resp);
     }
@@ -69,7 +71,7 @@ public class AuthController {
      */
     @PostMapping("/phone")
     public ResponseEntity<?> savePhone(@RequestBody Map<String, String> body,
-                                       Authentication authentication) {
+            Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {
             return ResponseEntity.status(401).body(Map.of("error", "Not authenticated"));
         }
@@ -141,11 +143,10 @@ public class AuthController {
 
         // 4. Rotate: revoke old, issue new
         RefreshToken newRefresh = refreshTokenService.rotateRefreshToken(stored, user);
-        String newAccess        = jwtUtil.generateToken(user);
+        String newAccess = jwtUtil.generateToken(user);
 
         return ResponseEntity.ok(Map.of(
-                "token",        newAccess,
-                "refreshToken", newRefresh.getToken()
-        ));
+                "token", newAccess,
+                "refreshToken", newRefresh.getToken()));
     }
 }

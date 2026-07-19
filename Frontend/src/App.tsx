@@ -41,8 +41,22 @@ export default function App() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
-  const [cart, setCart] = useState<CartItem[]>([]);
+  const [cart, setCart] = useState<CartItem[]>(() => {
+    try {
+      const stored = localStorage.getItem('cart_data');
+      if (stored) {
+        const { items, expiry } = JSON.parse(stored);
+        if (Date.now() < expiry) return items;
+        localStorage.removeItem('cart_data');
+      }
+    } catch { /* ignore parsing errors */ }
+    return [];
+  });
 
+  useEffect(() => {
+    const expiry = Date.now() + 4 * 7 * 24 * 60 * 60 * 1000; // 4 weeks
+    localStorage.setItem('cart_data', JSON.stringify({ items: cart, expiry }));
+  }, [cart]);
   // ─── Loading & error states ───
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
