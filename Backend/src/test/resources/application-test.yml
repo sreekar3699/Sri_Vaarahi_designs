@@ -17,3 +17,7 @@ spring:
             scope:
               - profile
               - email
+
+razorpay:
+  key-id: test-key-id
+  key-secret: test-key-secret
